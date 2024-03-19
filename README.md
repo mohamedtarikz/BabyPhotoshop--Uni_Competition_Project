@@ -1,2 +1,2 @@
-# Assignment-3-Little-photoshop-
+# Assignment-3-Little-photoshop
 assignment 3
