@@ -1,5 +1,5 @@
 # Baby Photoshop for Image Processing
-This project is aimed at developing a simplified version of an image processing software akin to Photoshop, where users can load images and apply various filters to manipulate them. Each team member is assigned specific filters to implement, ensuring comprehensive coverage and testing across all functionalities. The team is also responsible for integrating these filters seamlessly and testing them rigorously to ensure proper functionality.
+This project is aimed at developing a simplified version of an image processing software akin to Photoshop, where users can load images and apply various filters to manipulate them.
 
 ## Features
 - Filter 1:
