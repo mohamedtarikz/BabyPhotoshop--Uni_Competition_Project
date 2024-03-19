@@ -19,6 +19,26 @@ void insert_image() {
 
 }
 
+int save_image() {
+    string savechoice;
+    while (true) {
+        cout << "\n*** How do you want to save your image? ***\n";
+        cout << "A) Save as a new image\n";
+        cout << "B) Replace the existing image\n";
+        cout << "C) Back to the Main\n";
+        cout << "Enter your choice: ";
+        cin >> savechoice;
+        transform (savechoice.begin(),savechoice.end(),savechoice.begin(),::toupper);
+        if (savechoice == "A") {
+            return 0;
+        }else if (savechoice == "B") {
+            return 0;
+        }else if (savechoice == "C") {
+
+        }
+    }
+}
+
 int filters_menu() {
     string filterschoice;
     while (true) {
@@ -34,7 +54,7 @@ int filters_menu() {
             return 0;
         }else if (filterschoice == "B") {
             return 0;
-        }else if (filterschoice == "C"){
+        }else if (filterschoice == "C") {
             return 0;
         }else if (filterschoice == "D") {
             return 0;
@@ -47,9 +67,11 @@ int main() {
     string choice;
     while (true) {
         cout << "\n***Main Menu***\n";
+        cout << "===============\n";
         cout << "A) Insert image\n";
         cout << "B) Apply filters\n";
-        cout << "C) Exit the program\n";
+        cout << "C) Save image\n";
+        cout << "D) Exit the program\n";
         cout << "Enter your choice: ";
         cin >> choice;
         transform (choice.begin(),choice.end(),choice.begin(),::toupper);
@@ -57,8 +79,13 @@ int main() {
             insert_image();
         }else if (choice == "B") {
             filters_menu();
-        }else if (choice=="C"){
+        }else if (choice=="C") {
+            save_image();
             return 0;
+        }else if (choice=="D") {
+            return 0;
+        }else{
+            cout << "\nPlease enter a valid choice\n";
         }
     }
 }
