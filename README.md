@@ -1,7 +1,7 @@
 # Baby Photoshop for Image Processing
 This project is aimed at developing a simplified version of an image processing software akin to Photoshop, where users can load images and apply various filters to manipulate them.
 
-## Features
+## Features :
 ### Filter 1: Grayscale Conversion
   A grayscale image is an image where each pixel is represented by a single Sample indicating the intensity of light or shade. In grayscale images, there is no color information, only varying shades of gray from black to white. The intensity value of each pixel determines its brightness, with lower values representing darker shades and higher values representing lighter shades.
 ### Filter 2: Black and White
