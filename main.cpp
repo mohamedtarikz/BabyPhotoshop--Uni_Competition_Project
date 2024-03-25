@@ -20,65 +20,47 @@ Image uimage;
 
 string imginput;
 
-void Invert_Image()
-{
-    for (int i = 0; i < uimage.width; i++)
-    {
-        for (int j = 0; j < uimage.height; j++)
-        {
-            for (int k = 0; k < 3; k++)
-            {
+void Invert_Image() {
+    for (int i = 0; i < uimage.width; i++) {
+        for (int j = 0; j < uimage.height; j++) {
+            for (int k = 0; k < 3; k++) {
                 uimage(i, j, k) = 255 - (uimage(i, j, k));
             }
         }
     }
 }
 
-
-void greyscale()
-{
-    for (int i = 0; i < uimage.width; i++)
-    {
-        for (int j = 0; j < uimage.height; j++)
-        {
+void greyscale() {
+    for (int i = 0; i < uimage.width; i++) {
+        for (int j = 0; j < uimage.height; j++) {
             int av = 0;
-            for (int k = 0; k < 3; k++)
-            {
+            for (int k = 0; k < 3; k++) {
                 av += uimage(i, j, k);
             }
             av /= 3;
-            for (int k = 0; k < 3; k++)
-            {
+            for (int k = 0; k < 3; k++) {
                 uimage(i, j, k) = av;
             }
         }
     }
 }
 
-void black_and_white()
-{
-    for (int i = 0; i < uimage.width; i++)
-    {
-        for (int j = 0; j < uimage.height; j++)
-        {
+void black_and_white() {
+    for (int i = 0; i < uimage.width; i++) {
+        for (int j = 0; j < uimage.height; j++) {
             int av = 0;
-            for (int k = 0; k < 3; k++)
-            {
+            for (int k = 0; k < 3; k++) {
                 av += uimage(i, j, k);
             }
             av /= 3;
-            for (int k = 0; k < 3; k++)
-            {
+            for (int k = 0; k < 3; k++) {
                 uimage(i, j, k) = av;
             }
-            if (uimage(i, j, 0) < 128)
-            {
+            if (uimage(i, j, 0) < 128) {
                 uimage(i, j, 0) = 0;
                 uimage(i, j, 1) = 0;
                 uimage(i, j, 2) = 0;
-            }
-            else
-            {
+            } else {
                 uimage(i, j, 0) = 255;
                 uimage(i, j, 1) = 255;
                 uimage(i, j, 2) = 255;
@@ -87,15 +69,11 @@ void black_and_white()
     }
 }
 
-Image Rotate_Image()
-{
+Image Rotate_Image() {
     Image img(uimage.height, uimage.width);
-    for (int i = 0; i < uimage.width; i++)
-    {
-        for (int j = 0; j < uimage.height; j++)
-        {
-            for (int k = 0; k < 3; k++)
-            {
+    for (int i = 0; i < uimage.width; i++) {
+        for (int j = 0; j < uimage.height; j++) {
+            for (int k = 0; k < 3; k++) {
                 img(i, j, k) = uimage(i, j, k);
             }
         }
@@ -103,53 +81,92 @@ Image Rotate_Image()
     return img;
 }
 
-void flip_image(){
-    Image flipped (uimage.width, uimage.height);
-    
+void flip_horizontally() {
     // Flip the image in x direction
-    for (int i = 0; i < uimage.width; i++){
-        for (int j = 0; j < uimage.height; j++){
-            for (int k=0 ; k<3 ; k++){
-                flipped(i,j,k) = uimage(uimage.width-i,j,k);
+    Image flipped(uimage.width, uimage.height);
+    for (int i = 0; i < uimage.width; i++) {
+        for (int j = 0; j < uimage.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                flipped(i, j, k) = uimage(uimage.width - i, j, k);
             }
         }
     }
-    // Flip the image in y direction
-    for (int i = 0; i < uimage.width; i++){
-        for (int j = 0; j < uimage.height; j++){
-            for (int k=0 ; k<3 ; k++){
-                flipped(i,j,k) = uimage(i,uimage.height-j,k);
+    for (int i = 0; i < flipped.width; i++) {
+        for (int j = 0; j < flipped.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                uimage(i, j, k) = flipped(i, j, k);
             }
         }
     }
-    uimage = flipped;
-    uimage.saveImage("m.png");
 }
 
-int insert_image()
-{
-    while (true)
-    {
+void flip_vertically() {
+    // Flip the image in y direction
+    Image flipped(uimage.width, uimage.height);
+    for (int i = 0; i < uimage.width; i++) {
+        for (int j = 0; j < uimage.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                flipped(i, j, k) = uimage(i, uimage.height - j, k);
+            }
+        }
+    }
+    for (int i = 0; i < flipped.width; i++) {
+        for (int j = 0; j < flipped.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                uimage(i, j, k) = flipped(i, j, k);
+            }
+        }
+    }
+}
+
+int flip_image() {
+    string flipchoice;
+    while (true) {
+        cout << "\n*** How do you want to save your image? ***\n";
+        cout << "===========================================\n";
+        cout << "A) Flip horizontally\n";
+        cout << "B) Flip vertically\n";
+        cout << "C) Flip horizontally and vertically\n";
+        cout << "D) Back to filters menu\n";
+        cout << "===========================================\n";
+        cout << "Enter your choice: ";
+        cin >> flipchoice;
+        transform(flipchoice.begin(), flipchoice.end(), flipchoice.begin(), ::toupper);
+        if (flipchoice == "A") {
+            flip_horizontally();
+            return 0;
+        } else if (flipchoice == "B") {
+            flip_vertically();
+            return 0;
+        } else if (flipchoice == "C") {
+            flip_horizontally();
+            flip_vertically();
+            return 0;
+        } else if (flipchoice == "D") {
+            return 0;
+        } else {
+            cout << "\nPlease enter a valid choice\n";
+        }
+    }
+}
+
+int insert_image() {
+    while (true) {
         cout << "Please enter image name with it's extension: ";
         cin >> imginput;
-        try
-        {
+        try {
             uimage.loadNewImage(imginput);
             break;
-        }
-        catch (invalid_argument)
-        {
+        } catch (invalid_argument) {
             continue;
         }
     }
     return 0;
 }
 
-int save_image(Image img)
-{
+int save_image(Image img) {
     string savechoice;
-    while (true)
-    {
+    while (true) {
         cout << "\n*** How do you want to save your image? ***\n";
         cout << "===========================================\n";
         cout << "A) Save as a new image\n";
@@ -159,57 +176,40 @@ int save_image(Image img)
         cout << "Enter your choice: ";
         cin >> savechoice;
         transform(savechoice.begin(), savechoice.end(), savechoice.begin(), ::toupper);
-        if (savechoice == "A")
-        {
+        if (savechoice == "A") {
             string outimg;
-            while (true)
-            {
-                try
-                {
+            while (true) {
+                try {
                     cout << "\nPlease enter image name with it's extension: ";
                     cin >> outimg;
                     img.saveImage(outimg);
                     break;
-                }
-                catch (invalid_argument)
-                {
+                } catch (invalid_argument) {
                     continue;
                 }
             }
             return 0;
-        }
-        else if (savechoice == "B")
-        {
-            while (true)
-            {
-                try
-                {
+        } else if (savechoice == "B") {
+            while (true) {
+                try {
                     img.saveImage(imginput);
                     break;
-                }
-                catch (invalid_argument)
-                {
+                } catch (invalid_argument) {
                     continue;
                 }
             }
             return 0;
-        }
-        else if (savechoice == "C")
-        {
+        } else if (savechoice == "C") {
             return 0;
-        }
-        else
-        {
+        } else {
             cout << "\nPlease enter a valid choice\n";
         }
     }
 }
 
-int filters_menu()
-{
+int filters_menu() {
     string filterschoice;
-    while (true)
-    {
+    while (true) {
         cout << "\n***filters Menu***\n";
         cout << "===================\n";
         cout << "A) Greyscale\n";
@@ -224,32 +224,21 @@ int filters_menu()
         cout << "Enter your choice: ";
         cin >> filterschoice;
         transform(filterschoice.begin(), filterschoice.end(), filterschoice.begin(), ::toupper);
-        if (filterschoice == "A")
-        {
+        if (filterschoice == "A") {
             greyscale();
             return 0;
-        }
-        else if (filterschoice == "B")
-        {
+        } else if (filterschoice == "B") {
             black_and_white();
             return 0;
-        }
-        else if (filterschoice == "C")
-        {
+        } else if (filterschoice == "C") {
             Invert_Image();
             return 0;
-        }
-        else if (filterschoice == "D")
-        {
+        } else if (filterschoice == "D") {
             return 0;
-        }
-        else if (filterschoice == "E")
-        {
+        } else if (filterschoice == "E") {
             flip_image();
             return 0;
-        }
-        else if (filterschoice == "F")
-        {
+        } else if (filterschoice == "F") {
             int deg;
             cout << "enter degree: ";
             cin >> deg;
@@ -257,8 +246,7 @@ int filters_menu()
             deg %= 4;
             deg++;
             Image a(uimage.height, uimage.width), b(uimage.width, uimage.height), c(uimage.height, uimage.width), d(uimage.width, uimage.height);
-            for (int i = 1; i <= deg; i++)
-            {
+            for (int i = 1; i <= deg; i++) {
                 if (i == 1)
                     a = Rotate_Image();
                 else if (i == 2)
@@ -277,29 +265,21 @@ int filters_menu()
             else if (deg == 4)
                 d.saveImage("new.jpg");
             return 0;
-        }
-        else if (filterschoice == "G")
-        {
+        } else if (filterschoice == "G") {
             uimage.loadNewImage(imginput);
             cout << "All filters has been cleared";
-        }
-        else if (filterschoice == "H")
-        {
+        } else if (filterschoice == "H") {
             return 0;
-        }
-        else
-        {
+        } else {
             cout << "\nPlease enter a valid choice\n";
         }
     }
 }
 
-int main()
-{
+int main() {
     cout << "           \n******Welcome to baby photoshop program******\n";
     string choice;
-    while (true)
-    {
+    while (true) {
         cout << "\n***Main Menu***\n";
         cout << "===================\n";
         cout << "A) Insert image\n";
@@ -310,24 +290,15 @@ int main()
         cout << "Enter your choice: ";
         cin >> choice;
         transform(choice.begin(), choice.end(), choice.begin(), ::toupper);
-        if (choice == "A")
-        {
+        if (choice == "A") {
             insert_image();
-        }
-        else if (choice == "B")
-        {
+        } else if (choice == "B") {
             filters_menu();
-        }
-        else if (choice == "C")
-        {
+        } else if (choice == "C") {
             save_image(uimage);
-        }
-        else if (choice == "D")
-        {
+        } else if (choice == "D") {
             return 0;
-        }
-        else
-        {
+        } else {
             cout << "\nPlease enter a valid choice\n";
         }
     }
