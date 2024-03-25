@@ -1,34 +1,25 @@
 //  FCAI – Structured Programming – 2024 - Assignment 3
-//  File: CS112_A3_T3_S3_20230309_S4_20230381_20230554.cpp
+//  File: CS112_A3_S3_20230309_S4_20230381_20230554.cpp
 //  Purpose: Baby Photoshop for Image Processing
 //  *********************************************************************************Authors*********************************************************************************
-//  Mazen nasser >> Group A >> S3 >> 20230309 >> mazen.nasser143@gmail.com >>
-//  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >>
-//  Mohamed tarek >> Group A >> S4 >> 20230554 >> mohamedtarik06@gmail.com >>
+//  Mazen nasser >> Group A >> S3 >> 20230309 >> mazen.nasser143@gmail.com >> greyscale, 
+//  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >> black and white, Flip
+//  Mohamed tarek >> Group A >> S4 >> 20230554 >> mohamedtarik06@gmail.com >> Invert, 
 //  ********************************************************************************End Authors******************************************************************************
 //  TA: Ahmed Fouad
 //  Version: 1.0
-//  Last Modification Date: 19/03/2024
+//  Last Modification Date: 25/03/2024
 //  ===================================================================================================================================================================   //
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <cmath>
 #include "library/Image_Class.h"
 
 using namespace std;
 Image uimage;
 
 string imginput;
-
-void Invert_Image() {
-    for (int i = 0; i < uimage.width; i++) {
-        for (int j = 0; j < uimage.height; j++) {
-            for (int k = 0; k < 3; k++) {
-                uimage(i, j, k) = 255 - (uimage(i, j, k));
-            }
-        }
-    }
-}
 
 void greyscale() {
     for (int i = 0; i < uimage.width; i++) {
@@ -69,16 +60,14 @@ void black_and_white() {
     }
 }
 
-Image Rotate_Image() {
-    Image img(uimage.height, uimage.width);
+void Invert_Image() {
     for (int i = 0; i < uimage.width; i++) {
         for (int j = 0; j < uimage.height; j++) {
             for (int k = 0; k < 3; k++) {
-                img(i, j, k) = uimage(i, j, k);
+                uimage(i, j, k) = 255 - (uimage(i, j, k));
             }
         }
     }
-    return img;
 }
 
 void flip_horizontally() {
@@ -150,6 +139,43 @@ int flip_image() {
     }
 }
 
+// Image Rotate_Image() {
+//     Image img(uimage.height, uimage.width);
+//     for (int i = 0; i < uimage.width; i++) {
+//         for (int j = 0; j < uimage.height; j++) {
+//             for (int k = 0; k < 3; k++) {
+//                 img(i, j, k) = uimage(i, j, k);
+//             }
+//         }
+//     }
+//     int deg;
+//     cout << "enter degree: ";
+//     cin >> deg;
+//     deg /= 90;
+//     deg %= 4;
+//     deg++;
+//     Image a(uimage.height, uimage.width), b(uimage.width, uimage.height), c(uimage.height, uimage.width), d(uimage.width, uimage.height);
+//     for (int i = 1; i <= deg; i++) {
+//         if (i == 1)
+//             a = Rotate_Image();
+//         else if (i == 2)
+//             b = Rotate_Image();
+//         else if (i == 3)
+//             c = Rotate_Image();
+//         else
+//             d = Rotate_Image();
+//     }
+//     if (deg == 1)
+//         a.saveImage("new.jpg");
+//     else if (deg == 2)
+//         b.saveImage("new.jpg");
+//     else if (deg == 3)
+//         c.saveImage("new.jpg");
+//     else if (deg == 4)
+//         d.saveImage("new.jpg");
+//     return img;
+// }
+
 int insert_image() {
     while (true) {
         cout << "Please enter image name with it's extension: ";
@@ -163,6 +189,124 @@ int insert_image() {
     }
     return 0;
 }
+
+// CHat Gpt
+// void resize(){
+//     int newWidth=0,newHeight=0;
+//     cout << "Enter the width of the resized Image : ";
+//     cin >> newWidth;
+//     cout << "Enter the height of the resized Image : ";
+//     cin >> newHeight;
+//     Image mimage(newWidth,newHeight);
+//     float scaleX = (float)uimage.width / newWidth;
+//     float scaleY = (float)uimage.height / newHeight;
+
+//     for (int y = 0; y < newHeight; ++y) {
+//         for (int x = 0; x < newWidth; ++x) {
+//             // Calculate the position in the original image
+//             float srcX = (x + 0.5f) * scaleX - 0.5f;
+//             float srcY = (y + 0.5f) * scaleY - 0.5f;
+
+//             // Calculate integer coordinates of the four surrounding pixels
+//             int x0 = int(srcX);
+//             int y0 = int(srcY);
+//             int x1 = min(x0 + 1, uimage.width - 1);
+//             int y1 = min(y0 + 1, uimage.height - 1);
+
+//             // Calculate the fractional part of the coordinates
+//             float xFraction = srcX - x0;
+//             float yFraction = srcY - y0;
+
+//             // Perform bilinear interpolation for each color channel
+//             for (int c = 0; c < uimage.channels; ++c) {
+//                 float top = (1 - xFraction) * uimage.getPixel(x0, y0, c) + xFraction * uimage.getPixel(x1, y0, c);
+//                 float bottom = (1 - xFraction) * uimage.getPixel(x0, y1, c) + xFraction * uimage.getPixel(x1, y1, c);
+//                 float newValue = (1 - yFraction) * top + yFraction * bottom;
+//                 mimage.setPixel(x, y, c, (unsigned char)newValue);
+//             }
+//         }
+//     }
+//     mimage.saveImage("resized.png");
+// }
+
+// our
+// void resize(){
+//     int nwidth,nhight;
+//     cout << "enter the width: ";
+//     cin >> nwidth;
+//     cout << "enter the hight: ";
+//     cin >> nhight;
+//     Image mimage(nwidth,nhight);
+//     int swidth= ((double)uimage.width/(double)nwidth);
+//     int sheight= ((double)uimage.height/(double)nhight);
+//     int swl=uimage.width%mimage.width,shl=uimage.height%mimage.height;
+//     int avgr,avgb,avgg,idx;
+//     Image Big(uimage.width+swl,uimage.height+shl);
+//     for (int i = 0; i < Big.height; i++) {
+//         for (int j = 0; j < Big.width; j++) {
+//             for (int k = 0; k < 3; k++) {
+//                 if (j >= uimage.width){
+//                     Big(j, i, k) = 0;
+//                 }else{
+//                     Big(j, i, k) = uimage(j,i,k);
+//                 }
+//             }
+//         }
+//     }
+    // swidth= (Big.width/nwidth);
+    // sheight= (Big.height/nhight);
+    // for (int i = 0; i < mimage.height; ++i) {
+    //     idx=0;
+    //     for (int j = 0; j < mimage.width; ++j) {
+    //         avgr=avgb=avgg=0;
+    //         for (int k = 0; k < swidth; ++k) {
+    //             avgr+=Big(idx,i,0);
+    //             avgb+=Big(idx,i,1);
+    //             avgg+=Big(idx,i,2);
+    //             idx++;
+    //             if (idx>=uimage.width){
+    //                 break;
+    //             }
+    //         }
+    //         avgr/=swidth;
+    //         avgb/=swidth;
+    //         avgg/=swidth;
+    //         mimage(j,i,0) = avgr;
+    //         mimage(j,i,1) = avgb;
+    //         mimage(j,i,2) = avgg;
+    //         if (idx>=uimage.width){
+    //                 break;
+    //             }
+    //     }
+    // }
+    // for(int i = uimage.width-swl; i <uimage.width;i++) {
+    //     for(int j = uimage.height-shl; j <uimage.height;i++){
+            
+    //     }
+    // }
+    // for (int i = 0; i < mimage.width; ++i) {
+    //     idx=0;
+    //     for (int j = 0; j < mimage.height; ++j) {
+    //         avgr=avgb=avgg=0;
+    //         for (int k = 0; k < sheight; ++k) {
+    //             avgr+=uimage(i,idx,0);
+    //             avgb+=uimage(i,idx,1);
+    //             avgg+=uimage(i,idx,2);
+    //             idx++;
+    //             if (idx==uimage.height){
+    //                 break;
+    //             }
+    //         }
+    //         avgr/=sheight;
+    //         avgb/=sheight;
+    //         avgg/=sheight;
+    //         mimage(i,int(idx/sheight)-1,0) = avgr;
+    //         mimage(i,int(idx/sheight)-1,1) = avgb;
+    //         mimage(i,int(idx/sheight)-1,2) = avgg;
+    //     }
+    // }
+    // mimage.saveImage("BigBig.jpg");
+// }
 
 int save_image(Image img) {
     string savechoice;
@@ -212,10 +356,10 @@ int filters_menu() {
     while (true) {
         cout << "\n***filters Menu***\n";
         cout << "===================\n";
-        cout << "A) Greyscale\n";
+        cout << "A) Grey scale\n";
         cout << "B) Black and White\n";
         cout << "C) Invert image\n";
-        cout << "D) Filter 4\n";
+        cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate image\n";
         cout << "G) Clear All Filters\n";
@@ -239,31 +383,7 @@ int filters_menu() {
             flip_image();
             return 0;
         } else if (filterschoice == "F") {
-            int deg;
-            cout << "enter degree: ";
-            cin >> deg;
-            deg /= 90;
-            deg %= 4;
-            deg++;
-            Image a(uimage.height, uimage.width), b(uimage.width, uimage.height), c(uimage.height, uimage.width), d(uimage.width, uimage.height);
-            for (int i = 1; i <= deg; i++) {
-                if (i == 1)
-                    a = Rotate_Image();
-                else if (i == 2)
-                    b = Rotate_Image();
-                else if (i == 3)
-                    c = Rotate_Image();
-                else
-                    d = Rotate_Image();
-            }
-            if (deg == 1)
-                a.saveImage("new.jpg");
-            else if (deg == 2)
-                b.saveImage("new.jpg");
-            else if (deg == 3)
-                c.saveImage("new.jpg");
-            else if (deg == 4)
-                d.saveImage("new.jpg");
+            // resize();
             return 0;
         } else if (filterschoice == "G") {
             uimage.loadNewImage(imginput);
