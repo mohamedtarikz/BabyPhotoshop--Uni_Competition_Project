@@ -362,8 +362,9 @@ int filters_menu() {
         cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate image\n";
-        cout << "G) Clear All Filters\n";
-        cout << "H) Back to the Main\n";
+        cout << "G) Resize\n";
+        cout << "H) Clear All Filters\n";
+        cout << "I) Back to the Main\n";
         cout << "===================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice;
@@ -383,12 +384,15 @@ int filters_menu() {
             flip_image();
             return 0;
         } else if (filterschoice == "F") {
-            // resize();
+            // Rotate_Image();
             return 0;
         } else if (filterschoice == "G") {
+            // resize();
+            return 0;
+        } else if (filterschoice == "H") {
             uimage.loadNewImage(imginput);
             cout << "All filters has been cleared";
-        } else if (filterschoice == "H") {
+        } else if (filterschoice == "I") {
             return 0;
         } else {
             cout << "\nPlease enter a valid choice\n";
