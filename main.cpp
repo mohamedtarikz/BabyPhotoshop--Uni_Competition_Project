@@ -1,6 +1,7 @@
 //  FCAI – Structured Programming – 2024 - Assignment 3
 //  File: CS112_A3_Part1_S3_20230309_S4_20230381_20230554.cpp
 //  Purpose: Baby Photoshop for Image Processing
+//  Flow map link: https://drive.google.com/file/d/1efY7Dc3V8tU-0ygiAyMTlVMV-9hApo94/view?usp=sharing
 //  *********************************************************************************Authors*********************************************************************************
 //  Mazen nasser >> Group A >> S3 >> 20230309 >> mazen.nasser143@gmail.com >> greyscale, merge
 //  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >> black and white, Flip, menus, error handling
@@ -9,15 +10,16 @@
 //  TA: Ahmed Fouad
 //  Version: 1.0
 //  Last Modification Date: 27/03/2024
-//  ===================================================================================================================================================================   //
+//  =============================================================================================================================================================================   //
 /*
                                                                 \\ Version 1 Notes //
     - The program can handle only two images at a time and they should be in the same directory as the executable file or absolute path to them.
     - Merging Function works on partial crop of the top right corner image with dimentions of the smaller image (will be fixed in V2-Part 2 inshaalah after making resize).
     - Merging two images and rotating images are saved directly (will be fixed in the next version inshaalah with "temp file creation" saving system).
     - The program can handle images with different sizes (width and height).
+    - The program stays at filters menu in case you want to apply more than one filter Notice that you can't apply more than one filter on rotated or merged images (until now).
 */
-//  ===================================================================================================================================================================   //
+//  =============================================================================================================================================================================   //
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -45,6 +47,7 @@ void greyscale() {
             }
         }
     }
+    cout << "Operation completed successfully!" << endl;
 }
 
 // Function to convert the input image to black and white
@@ -74,6 +77,7 @@ void black_and_white() {
             }
         }
     }
+    cout << "Operation completed successfully!" << endl;
 }
 
 // Function to invert the colors of the input image
@@ -87,6 +91,7 @@ void Invert_Image() {
             }
         }
     }
+    cout << "Operation completed successfully!" << endl;
 }
 
 // Function to merge the input image with another image
@@ -95,7 +100,7 @@ void merge_Image() {
     Image img_second; // Object to hold the second image
     // Loop until a valid second image is loaded
     while (true) {
-        cout << "Please enter image name with its extension: ";
+        cout << "Please enter second image name with its extension: ";
         cin >> second_image;
         try {
             img_second.loadNewImage(second_image); // Attempt to load the second image
@@ -116,7 +121,8 @@ void merge_Image() {
         }
     }
     // Save the merged image with a filename indicating the merge operation
-    img_merged.saveImage(imginput + "+" + second_image + "_merged.jpg");
+    img_merged.saveImage("_merged.jpg");
+    cout << "Operation completed successfully! and file saved as _merged.jpg" << endl;
 }
 
 // Function to flip the input image horizontally
@@ -181,13 +187,16 @@ int flip_image() {
         transform(flipchoice.begin(), flipchoice.end(), flipchoice.begin(), ::toupper);
         if (flipchoice == "A") {
             flip_horizontally();
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "B") {
             flip_vertically();
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "C") {
             flip_horizontally();
             flip_vertically();
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "D") {
             return 0;
@@ -212,8 +221,9 @@ void Rotate_Image_90() {
             }
         }
     }
-    img_in = rotated;
-    img_in.saveImage(imginput+"_rotated.jpg");
+    img_in.saveImage("_rotated.jpg");
+    cout << "Operation completed successfully!" << endl;
+    cout << "file saved as _rotated.jpg" << endl;
 }
 
 // This function provides options to rotate the image based on user input.
@@ -241,8 +251,10 @@ int Rotate_Image() {
             // Rotate the image 180 degrees
             flip_horizontally(); // Flip the image horizontally
             flip_vertically(); // Flip the image vertically
-            img_in.saveImage(imginput+"_rotated.jpg"); // Save the rotated image
-            return 0; 
+            img_in.saveImage("_rotated.jpg"); // Save the rotated image
+            cout << "Operation completed successfully!" << endl;
+            cout << "file saved as _rotated.jpg" << endl;
+            return 0;
         } else if (flipchoice == "C") {
             // Rotate the image 270 degrees clockwise
             flip_horizontally(); // Flip the image horizontally
@@ -337,25 +349,19 @@ int filters_menu() {
         // Process user's filter choice
         if (filterschoice == "A") { // Apply Grey scale filter
             greyscale();
-            return 0; 
         } else if (filterschoice == "B") { // Apply Black and White filter
             black_and_white();
-            return 0; 
         } else if (filterschoice == "C") { // Apply Invert image filter
             Invert_Image();
-            return 0; 
         } else if (filterschoice == "D") { // Apply Merge filter
             merge_Image();
-            return 0; 
         } else if (filterschoice == "E") { // Apply Flip filter
             flip_image();
-            return 0; 
         } else if (filterschoice == "F") { // Apply Rotate image filter
             Rotate_Image();
-            return 0; 
         } else if (filterschoice == "G") { // Clear All Filters
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
-            cout << "All filters have been cleared"; // Inform the user that all filters have been cleared
+            cout << "All filters have been cleared" << endl; // Inform the user that all filters have been cleared
         } else if (filterschoice == "H") { 
             return 0; 
         } else { 
@@ -382,10 +388,12 @@ int main() {
         // Process user's main menu choice
         if (choice == "A") { // Insert image
             insert_image();
+            cout << "Image Inserted!" << endl;
         } else if (choice == "B") { // Apply filters
             filters_menu();
         } else if (choice == "C") { // Save image
             save_image(img_in);
+            cout << "Image Saved!" << endl;
         } else if (choice == "D") { // Exit the program
             return 0;
         } else { 
