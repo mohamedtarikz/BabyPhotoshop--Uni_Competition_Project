@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <string>
 #include <cmath>
-#include "Image_Class.h" // use V2.0 OR (V2.1 when released ;D)
+#include "library/Image_Class.h" // use V2.0 OR
 
 using namespace std;
 Image img_in;
