@@ -210,19 +210,22 @@ void Rotate_Image_90() {
     img_in = img_rotated;
 }
 
-// Function to prompt the user to enter an image name with its extension and load the image
-int insert_image() {
-    while (true) { // Loop until a valid image is loaded
-        cout << "Please enter image name with its extension: ";
-        cin >> imginput; // Read image name from user input
-        try {
-            img_in.loadNewImage(imginput); // Attempt to load the image
-            break;
-        } catch (invalid_argument) { // Catch exception if image loading fails
-            continue;
+// Function to invert the red channel of the input image
+void infera_red() {
+    for (int i = 0; i < img_in.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                // If the current channel is the red channel (k = 0)
+                if (k == 0) {
+                    // Set the red channel to the maximum value of 255
+                    img_in(i, j, k) = 255;
+                } else {
+                    // Otherwise, invert the current channel (subtract the value of the current channel from 255)
+                    img_in(i, j, k) = 255 - img_in(i, j, k);
+                }
+            }
         }
     }
-    return 0;
 }
 
 // This function provides options to rotate the image based on user input.
@@ -262,6 +265,21 @@ int rotate_Image() {
             cout << "\nPlease enter a valid choice\n";
         }
     }
+}
+
+// Function to prompt the user to enter an image name with its extension and load the image
+int insert_image() {
+    while (true) { // Loop until a valid image is loaded
+        cout << "Please enter image name with its extension: ";
+        cin >> imginput; // Read image name from user input
+        try {
+            img_in.loadNewImage(imginput); // Attempt to load the image
+            break;
+        } catch (invalid_argument) { // Catch exception if image loading fails
+            continue;
+        }
+    }
+    return 0;
 }
 
 // Function to provide options for saving an image
@@ -321,8 +339,9 @@ int filters_menu() {
         cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate image\n";
-        cout << "G) Clear All Filters\n";
-        cout << "H) Back to the Main menu\n";
+        cout << "G) Infera red\n";
+        cout << "H) Clear All Filters\n";
+        cout << "I) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -346,10 +365,13 @@ int filters_menu() {
         } else if (filterschoice == "F") { // Apply Rotate image filter
             rotate_Image();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "G") { // Clear All Filters
+        } else if (filterschoice == "G") { // Apply Rotate image filter
+            infera_red();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "H") { // Clear All Filters
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl; // Inform the user that all filters have been cleared
-        } else if (filterschoice == "H") {
+        } else if (filterschoice == "I") {
             return 0;
         } else {
             cout << "\nPlease enter a valid choice\n";
