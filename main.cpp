@@ -8,11 +8,12 @@
 //  Mohamed tarek >> Group A >> S4 >> 20230554 >> mohamedtarik06@gmail.com >> Invert, rotate
 //  ********************************************************************************End Authors******************************************************************************
 //  TA: Ahmed Fouad
-//  Version: 1.0
-//  Last Modification Date: 27/03/2024
+//  Version: 1.1
+//  Last Modification Date: 28/03/2024
 //  =============================================================================================================================================================================   //
 /*
                                                                 \\ Version 1 Notes //
+    - "Image_Class.h" V1.0
     - The program can handle only two images at a time and they should be in the same directory as the executable file or absolute path to them.
     - Merging Function works on partial crop of the top right corner image with dimentions of the smaller image (will be fixed in V2-Part 2 inshaalah after making resize).
     - Merging two images and rotating images are saved directly (will be fixed in the next version inshaalah with "temp file creation" saving system).
@@ -20,11 +21,17 @@
     - The program stays at filters menu in case you want to apply more than one filter Notice that you can't apply more than one filter on rotated or merged images (until now).
 */
 //  =============================================================================================================================================================================   //
+/*
+                                                                \\ Version 1.1 Notes //
+    - "Image_Class.h" V2.0
+    -  V1.0 issues fixed by due to the updated library.
+*/
+//  =============================================================================================================================================================================   //
 #include <iostream>
 #include <algorithm>
 #include <string>
 #include <cmath>
-#include "library/Image_Class.h"
+#include "Image_Class.h" // use V2.0 OR (V2.1 when released ;D)
 
 using namespace std;
 Image img_in;
@@ -47,7 +54,6 @@ void greyscale() {
             }
         }
     }
-    cout << "Operation completed successfully!" << endl;
 }
 
 // Function to convert the input image to black and white
@@ -77,7 +83,6 @@ void black_and_white() {
             }
         }
     }
-    cout << "Operation completed successfully!" << endl;
 }
 
 // Function to invert the colors of the input image
@@ -91,11 +96,10 @@ void Invert_Image() {
             }
         }
     }
-    cout << "Operation completed successfully!" << endl;
 }
 
 // Function to merge the input image with another image
-void merge_Image() {
+void merge_Images() {
     string second_image; // Variable to store the name of the second image
     Image img_second; // Object to hold the second image
     // Loop until a valid second image is loaded
@@ -104,9 +108,9 @@ void merge_Image() {
         cin >> second_image;
         try {
             img_second.loadNewImage(second_image); // Attempt to load the second image
-            break; // Break the loop if successful
+            break;
         } catch (invalid_argument) {
-            continue; // Continue looping if an invalid image name is provided
+            continue;
         }
     }
     // Create a new image for merging with dimensions equal to the minimum of the two input images
@@ -121,8 +125,7 @@ void merge_Image() {
         }
     }
     // Save the merged image with a filename indicating the merge operation
-    img_merged.saveImage("_merged.jpg");
-    cout << "Operation completed successfully! and file saved as _merged.jpg" << endl;
+    img_in = img_merged;
 }
 
 // Function to flip the input image horizontally
@@ -138,14 +141,7 @@ void flip_horizontally() {
             }
         }
     }
-    // Copy the flipped image back to the input image
-    for (int i = 0; i < flipped.width; i++) {
-        for (int j = 0; j < flipped.height; j++) {
-            for (int k = 0; k < 3; k++) {
-                img_in(i, j, k) = flipped(i, j, k);
-            }
-        }
-    }
+    img_in = flipped;
 }
 
 // Function to flip the input image vertically
@@ -161,14 +157,7 @@ void flip_vertically() {
             }
         }
     }
-    // Copy the flipped image back to the input image
-    for (int i = 0; i < flipped.width; i++) {
-        for (int j = 0; j < flipped.height; j++) {
-            for (int k = 0; k < 3; k++) {
-                img_in(i, j, k) = flipped(i, j, k);
-            }
-        }
-    }
+    img_in = flipped;
 }
 
 // flipping an image using user choice of direction menu
@@ -187,16 +176,13 @@ int flip_image() {
         transform(flipchoice.begin(), flipchoice.end(), flipchoice.begin(), ::toupper);
         if (flipchoice == "A") {
             flip_horizontally();
-            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "B") {
             flip_vertically();
-            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "C") {
             flip_horizontally();
             flip_vertically();
-            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "D") {
             return 0;
@@ -209,7 +195,7 @@ int flip_image() {
 // This function rotates an image 90 degrees clockwise.
 void Rotate_Image_90() {
     // Create a new Image object with dimensions swapped to accommodate rotation.
-    Image rotated(img_in.height, img_in.width);
+    Image img_rotated(img_in.height, img_in.width);
     // Iterate over the pixels of the original image.
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
@@ -217,17 +203,30 @@ void Rotate_Image_90() {
             for (int k = 0; k < 3; k++) {
                 // Assign pixel value from original image to the corresponding position
                 // in the rotated image, swapping x and y coordinates.
-                rotated(j, i, k) = img_in(i, j, k);
+                img_rotated(j, i, k) = img_in(i, j, k);
             }
         }
     }
-    img_in.saveImage("_rotated.jpg");
-    cout << "Operation completed successfully!" << endl;
-    cout << "file saved as _rotated.jpg" << endl;
+    img_in = img_rotated;
+}
+
+// Function to prompt the user to enter an image name with its extension and load the image
+int insert_image() {
+    while (true) { // Loop until a valid image is loaded
+        cout << "Please enter image name with its extension: ";
+        cin >> imginput; // Read image name from user input
+        try {
+            img_in.loadNewImage(imginput); // Attempt to load the image
+            break;
+        } catch (invalid_argument) { // Catch exception if image loading fails
+            continue;
+        }
+    }
+    return 0;
 }
 
 // This function provides options to rotate the image based on user input.
-int Rotate_Image() {
+int rotate_Image() {
     string flipchoice; // Variable to store user's choice
     while (true) { // Infinite loop to repeatedly prompt the user until a valid choice is made
         // Display menu options
@@ -244,49 +243,31 @@ int Rotate_Image() {
         // Process user's choice
         if (flipchoice == "A") {
             // Rotate the image 90 degrees clockwise
-            flip_vertically(); // Flip the image vertically
-            Rotate_Image_90(); // Rotate the image 90 degrees clockwise
-            return 0; 
+            flip_vertically();
+            Rotate_Image_90();
+            return 0;
         } else if (flipchoice == "B") {
             // Rotate the image 180 degrees
-            flip_horizontally(); // Flip the image horizontally
-            flip_vertically(); // Flip the image vertically
-            img_in.saveImage("_rotated.jpg"); // Save the rotated image
-            cout << "Operation completed successfully!" << endl;
-            cout << "file saved as _rotated.jpg" << endl;
+            flip_horizontally();
+            flip_vertically();
             return 0;
         } else if (flipchoice == "C") {
             // Rotate the image 270 degrees clockwise
-            flip_horizontally(); // Flip the image horizontally
-            Rotate_Image_90(); // Rotate the image 90 degrees clockwise
-            return 0; 
+            flip_horizontally();
+            Rotate_Image_90();
+            return 0;
         } else if (flipchoice == "D") {
-            return 0; 
+            return 0;
         } else {
             cout << "\nPlease enter a valid choice\n";
         }
     }
 }
 
-// Function to prompt the user to enter an image name with its extension and load the image
-int insert_image() {
-    while (true) { // Loop until a valid image is loaded
-        cout << "Please enter image name with its extension: ";
-        cin >> imginput; // Read image name from user input
-        try {
-            img_in.loadNewImage(imginput); // Attempt to load the image
-            break; 
-        } catch (invalid_argument) { // Catch exception if image loading fails
-            continue; 
-        }
-    }
-    return 0; 
-}
-
 // Function to provide options for saving an image
 int save_image(Image img_save) {
     string savechoice; // Variable to store user's save choice
-    while (true) { 
+    while (true) {
         cout << "\n*** How do you want to save your image? ***\n";
         cout << "===========================================\n";
         cout << "A) Save as a new image\n";
@@ -309,7 +290,7 @@ int save_image(Image img_save) {
                     continue; // Continue to prompt the user for a valid output image name
                 }
             }
-            return 0; 
+            return 0;
         } else if (savechoice == "B") { // Replace the existing image
             while (true) { // Loop until image saving is successful
                 try {
@@ -319,11 +300,11 @@ int save_image(Image img_save) {
                     continue; // Continue to attempt image saving
                 }
             }
-            return 0; 
-        } else if (savechoice == "C") { 
-            return 0; 
-        } else { 
-            cout << "\nPlease enter a valid choice\n"; 
+            return 0;
+        } else if (savechoice == "C") {
+            return 0;
+        } else {
+            cout << "\nPlease enter a valid choice\n";
         }
     }
 }
@@ -331,7 +312,7 @@ int save_image(Image img_save) {
 // Function to display the filters menu and apply selected filters
 int filters_menu() {
     string filterschoice; // Variable to store user's filter choice
-    while (true) { 
+    while (true) {
         cout << "\n*** Filters Menu ***\n";
         cout << "========================\n";
         cout << "A) Grey scale\n";
@@ -349,30 +330,36 @@ int filters_menu() {
         // Process user's filter choice
         if (filterschoice == "A") { // Apply Grey scale filter
             greyscale();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "B") { // Apply Black and White filter
             black_and_white();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "C") { // Apply Invert image filter
             Invert_Image();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "D") { // Apply Merge filter
-            merge_Image();
+            merge_Images();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "E") { // Apply Flip filter
             flip_image();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "F") { // Apply Rotate image filter
-            Rotate_Image();
+            rotate_Image();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "G") { // Clear All Filters
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
-            cout << "All filters have been cleared" << endl; // Inform the user that all filters have been cleared
-        } else if (filterschoice == "H") { 
-            return 0; 
-        } else { 
-            cout << "\nPlease enter a valid choice\n"; 
+            cout << "All filters have been cleared!" << endl; // Inform the user that all filters have been cleared
+        } else if (filterschoice == "H") {
+            return 0;
+        } else {
+            cout << "\nPlease enter a valid choice\n";
         }
     }
 }
 
 // Main function of the program
 int main() {
-    cout << "           \n****** Welcome to baby photoshop program ******\n"; 
+    cout << "           \n****** Welcome to baby photoshop program ******\n";
     string choice; // Variable to store user's main menu choice
     while (true) {
         cout << "\n*** Main Menu ***\n";
@@ -396,8 +383,8 @@ int main() {
             cout << "Image Saved!" << endl;
         } else if (choice == "D") { // Exit the program
             return 0;
-        } else { 
-            cout << "\nPlease enter a valid choice\n"; // Prompt the user to enter a
+        } else {
+            cout << "\nPlease enter a valid choice\n";
         }
     }
 }
