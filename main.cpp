@@ -8,7 +8,7 @@
 //  Mohamed tarek >> Group A >> S4 >> 20230554 >> mohamedtarik06@gmail.com >> Invert, rotate
 //  ********************************************************************************End Authors******************************************************************************
 //  TA: Ahmed Fouad
-//  Version: 1.1
+//  Version: 2.0
 //  Last Modification Date: 28/03/2024
 //  =============================================================================================================================================================================   //
 /*
@@ -31,11 +31,19 @@
 #include <algorithm>
 #include <string>
 #include <cmath>
-#include "library/Image_Class.h" // use V2.0 OR
+#include "library/Image_Class.h" // use "Image_Class.h" V2.0
 
 using namespace std;
 Image img_in;
 string imginput;
+
+bool isNumeric(string str) {
+    for (int i = 0; i < str.length(); i++) {
+        if (isdigit(str[i]) == false)
+            return false; //when one non numeric value is found, return false
+    }
+    return true;
+}
 
 // Function to convert the input image to grayscale
 void greyscale() {
@@ -70,23 +78,76 @@ void black_and_white() {
             // Set each RGB channel to the average value
             for (int k = 0; k < 3; k++) {
                 img_in(i, j, k) = av;
-            }
-            // Convert to black and white based on threshold (128)
-            if (img_in(i, j, 0) < 128) {
-                img_in(i, j, 0) = 0;
-                img_in(i, j, 1) = 0;
-                img_in(i, j, 2) = 0;
-            } else {
-                img_in(i, j, 0) = 255;
-                img_in(i, j, 1) = 255;
-                img_in(i, j, 2) = 255;
+                // Convert to black and white based on threshold (128)
+                if (img_in(i, j, k) < 128) {
+                    img_in(i, j, k) = 0;
+                } else {
+                    img_in(i, j, k) = 255;
+                }
             }
         }
     }
 }
 
+// Function to crop an image
+void crop_image() {
+    // Declare variables to store user input for coordinates and dimensions
+    string X, Y, W, H;
+    // Continue prompting for input until valid values are provided
+    while (true) {
+        // Prompt user to enter starting X coordinate
+        cout << "Enter starting X coordinate: ";
+        cin >> X;
+        // Prompt user to enter starting Y coordinate
+        cout << "Enter starting Y Coordinate: ";
+        cin >> Y;
+        // Prompt user to enter the width of the crop area
+        cout << "Enter the width of crop area : ";
+        cin >> W;
+        // Prompt user to enter the height of the crop area
+        cout << "Enter the height of crop area : ";
+        cin >> H;
+        // Check if any input is not numeric
+        if (!isNumeric(X) || !isNumeric(Y) || !isNumeric(W) || !isNumeric(H)) {
+            cout << "Invalid input! Please enter positive integer values." << endl;
+            continue;
+        }
+        // Convert input strings to integers
+        int x = stoi(X), y = stoi(Y), w = stoi(W), h = stoi(H);
+        // Check if the specified crop area is within the bounds of the image
+        if (x > img_in.width || y > img_in.height || w > img_in.width - x || h > img_in.height - y) {
+            cout << "Coordinates are out of bounds." << endl;
+            continue;
+        } else {
+            // Break out of the loop if input is valid
+            break;
+        }
+    }
+    // Convert input strings to integers after validation
+    int x = stoi(X), y = stoi(Y), w = stoi(W), h = stoi(H);
+    // Initialize variables for iterating through cropped image
+    int M = 0, N = 0, L = 0;
+    // Create a new image to store the cropped region
+    Image img_cropped(w, h);
+    // Iterate over the specified region of the input image and copy pixels to cropped image
+    for (int i = x; i < w + x; i++) {
+        for (int j = y; j < h + y; j++) {
+            for (int k = 0; k < 3; k++) {
+                // Copy pixel values from input image to cropped image
+                img_cropped(M, N, L) = img_in(i, j, k);
+                L++;
+            }
+            N++;
+            L = 0;
+        }
+        M++;
+        N = 0;
+    }
+    img_in = img_cropped;
+}
+
 // Function to invert the colors of the input image
-void Invert_Image() {
+void invert_image() {
     // Iterate through each pixel in the image
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
@@ -99,7 +160,7 @@ void Invert_Image() {
 }
 
 // Function to merge the input image with another image
-void merge_Images() {
+void merge_images() {
     string second_image; // Variable to store the name of the second image
     Image img_second; // Object to hold the second image
     // Loop until a valid second image is loaded
@@ -124,44 +185,43 @@ void merge_Images() {
             }
         }
     }
-    // Save the merged image with a filename indicating the merge operation
     img_in = img_merged;
 }
 
 // Function to flip the input image horizontally
 void flip_horizontally() {
     // Create a new image to store the horizontally flipped image
-    Image flipped(img_in.width, img_in.height);
+    Image img_flipped(img_in.width, img_in.height);
     // Iterate through each pixel in the image
     for (int i = img_in.width - 1; i >= 0; i--) {
         for (int j = 0; j < img_in.height; j++) {
             // Flip the image in the x-direction
             for (int k = 0; k < 3; k++) {
-                flipped(img_in.width - 1 - i, j, k) = img_in(i, j, k);
+                img_flipped(img_in.width - 1 - i, j, k) = img_in(i, j, k);
             }
         }
     }
-    img_in = flipped;
+    img_in = img_flipped;
 }
 
 // Function to flip the input image vertically
 void flip_vertically() {
     // Create a new image to store the vertically flipped image
-    Image flipped(img_in.width, img_in.height);
+    Image img_flipped(img_in.width, img_in.height);
     // Iterate through each pixel in the image
     for (int j = img_in.height - 1; j >= 0; j--) {
         for (int i = 0; i < img_in.width; i++) {
             // Flip the image in the y-direction
             for (int k = 0; k < 3; k++) {
-                flipped(i, img_in.height - 1 - j, k) = img_in(i, j, k);
+                img_flipped(i, img_in.height - 1 - j, k) = img_in(i, j, k);
             }
         }
     }
-    img_in = flipped;
+    img_in = img_flipped;
 }
 
 // flipping an image using user choice of direction menu
-int flip_image() {
+int flip_image_menu() {
     string flipchoice;
     while (true) {
         cout << "\n*** How do you want to save your image? ***\n";
@@ -187,13 +247,13 @@ int flip_image() {
         } else if (flipchoice == "D") {
             return 0;
         } else {
-            cout << "\nPlease enter a valid choice\n";
+            cout << "Please enter a valid choice" << endl;
         }
     }
 }
 
 // This function rotates an image 90 degrees clockwise.
-void Rotate_Image_90() {
+void rotate_image_90deg() {
     // Create a new Image object with dimensions swapped to accommodate rotation.
     Image img_rotated(img_in.height, img_in.width);
     // Iterate over the pixels of the original image.
@@ -208,6 +268,45 @@ void Rotate_Image_90() {
         }
     }
     img_in = img_rotated;
+}
+
+// This function provides options to rotate the image based on user input.
+int rotate_image_menu() {
+    string flipchoice; // Variable to store user's choice
+    while (true) { // Infinite loop to repeatedly prompt the user until a valid choice is made
+        // Display menu options
+        cout << "\n*** How do you want to rotate your image? ***\n";
+        cout << "==============================================\n";
+        cout << "A) Rotate 90\n";
+        cout << "B) Rotate 180\n";
+        cout << "C) Rotate 270\n";
+        cout << "D) Back to filters menu\n";
+        cout << "==============================================\n";
+        cout << "Enter your choice: ";
+        cin >> flipchoice; // Read user's choice
+        transform(flipchoice.begin(), flipchoice.end(), flipchoice.begin(), ::toupper); // Convert user's choice to uppercase
+        // Process user's choice
+        if (flipchoice == "A") {
+            // Rotate the image 90 degrees clockwise
+            flip_vertically();
+            rotate_image_90deg();
+            return 0;
+        } else if (flipchoice == "B") {
+            // Rotate the image 180 degrees
+            flip_horizontally();
+            flip_vertically();
+            return 0;
+        } else if (flipchoice == "C") {
+            // Rotate the image 270 degrees clockwise
+            flip_horizontally();
+            rotate_image_90deg();
+            return 0;
+        } else if (flipchoice == "D") {
+            return 0;
+        } else {
+            cout << "Please enter a valid choice" << endl;
+        }
+    }
 }
 
 // Function to invert the red channel of the input image
@@ -228,47 +327,8 @@ void infera_red() {
     }
 }
 
-// This function provides options to rotate the image based on user input.
-int rotate_Image() {
-    string flipchoice; // Variable to store user's choice
-    while (true) { // Infinite loop to repeatedly prompt the user until a valid choice is made
-        // Display menu options
-        cout << "\n*** How do you want to rotate your image? ***\n";
-        cout << "==============================================\n";
-        cout << "A) Rotate 90\n";
-        cout << "B) Rotate 180\n";
-        cout << "C) Rotate 270\n";
-        cout << "D) Back to filters menu\n";
-        cout << "==============================================\n";
-        cout << "Enter your choice: ";
-        cin >> flipchoice; // Read user's choice
-        transform(flipchoice.begin(), flipchoice.end(), flipchoice.begin(), ::toupper); // Convert user's choice to uppercase
-        // Process user's choice
-        if (flipchoice == "A") {
-            // Rotate the image 90 degrees clockwise
-            flip_vertically();
-            Rotate_Image_90();
-            return 0;
-        } else if (flipchoice == "B") {
-            // Rotate the image 180 degrees
-            flip_horizontally();
-            flip_vertically();
-            return 0;
-        } else if (flipchoice == "C") {
-            // Rotate the image 270 degrees clockwise
-            flip_horizontally();
-            Rotate_Image_90();
-            return 0;
-        } else if (flipchoice == "D") {
-            return 0;
-        } else {
-            cout << "\nPlease enter a valid choice\n";
-        }
-    }
-}
-
 // Function to prompt the user to enter an image name with its extension and load the image
-int insert_image() {
+int insert() {
     while (true) { // Loop until a valid image is loaded
         cout << "Please enter image name with its extension: ";
         cin >> imginput; // Read image name from user input
@@ -283,7 +343,7 @@ int insert_image() {
 }
 
 // Function to provide options for saving an image
-int save_image(Image img_save) {
+int save(Image img_save) {
     string savechoice; // Variable to store user's save choice
     while (true) {
         cout << "\n*** How do you want to save your image? ***\n";
@@ -322,7 +382,7 @@ int save_image(Image img_save) {
         } else if (savechoice == "C") {
             return 0;
         } else {
-            cout << "\nPlease enter a valid choice\n";
+            cout << "Please enter a valid choice" << endl;
         }
     }
 }
@@ -340,8 +400,9 @@ int filters_menu() {
         cout << "E) Flip\n";
         cout << "F) Rotate image\n";
         cout << "G) Infera red\n";
-        cout << "H) Clear All Filters\n";
-        cout << "I) Back to the Main menu\n";
+        cout << "H) Crop\n";
+        cout << "I) Clear All Filters\n";
+        cout << "J) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -354,27 +415,30 @@ int filters_menu() {
             black_and_white();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "C") { // Apply Invert image filter
-            Invert_Image();
+            invert_image();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "D") { // Apply Merge filter
-            merge_Images();
+            merge_images();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "E") { // Apply Flip filter
-            flip_image();
+            flip_image_menu();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "F") { // Apply Rotate image filter
-            rotate_Image();
+            rotate_image_menu();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "G") { // Apply Rotate image filter
+        } else if (filterschoice == "G") { // Apply IR filter
             infera_red();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "H") { // Clear All Filters
+        } else if (filterschoice == "H") { // Apply Crop filter
+            crop_image();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "I") { // Clear All Filters
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl; // Inform the user that all filters have been cleared
-        } else if (filterschoice == "I") {
+        } else if (filterschoice == "J") {
             return 0;
         } else {
-            cout << "\nPlease enter a valid choice\n";
+            cout << "Please enter a valid choice" << endl;
         }
     }
 }
@@ -396,17 +460,17 @@ int main() {
         transform(choice.begin(), choice.end(), choice.begin(), ::toupper); // Convert main menu choice to uppercase
         // Process user's main menu choice
         if (choice == "A") { // Insert image
-            insert_image();
+            insert();
             cout << "Image Inserted!" << endl;
         } else if (choice == "B") { // Apply filters
             filters_menu();
         } else if (choice == "C") { // Save image
-            save_image(img_in);
+            save(img_in);
             cout << "Image Saved!" << endl;
         } else if (choice == "D") { // Exit the program
             return 0;
         } else {
-            cout << "\nPlease enter a valid choice\n";
+            cout << "Please enter a valid choice" << endl;
         }
     }
 }
