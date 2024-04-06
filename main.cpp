@@ -4,7 +4,7 @@
 //  Flow map link: https://drive.google.com/file/d/1efY7Dc3V8tU-0ygiAyMTlVMV-9hApo94/view?usp=sharing
 //  *********************************************************************************Authors*********************************************************************************
 //  Mazen nasser >> Group A >> S3 >> 20230309 >> mazen.nasser143@gmail.com >> greyscale, merge
-//  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >> black and white, Flip, menus, error handling
+//  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >> black and white, Flip, Crop, infera red, menus, error handling
 //  Mohamed tarek >> Group A >> S4 >> 20230554 >> mohamedtarik06@gmail.com >> Invert, rotate
 //  ********************************************************************************End Authors******************************************************************************
 //  TA: Ahmed Fouad
@@ -31,7 +31,7 @@
 #include <algorithm>
 #include <string>
 #include <cmath>
-#include "library/Image_Class.h" // use "Image_Class.h" V2.0
+#include "library/Image_Class.h"
 
 using namespace std;
 Image img_in;
@@ -126,7 +126,7 @@ void crop_image() {
     // Convert input strings to integers after validation
     int x = stoi(X), y = stoi(Y), w = stoi(W), h = stoi(H);
     // Initialize variables for iterating through cropped image
-    int M = 0, N = 0, L = 0;
+    int M = 0, N = 0;
     // Create a new image to store the cropped region
     Image img_cropped(w, h);
     // Iterate over the specified region of the input image and copy pixels to cropped image
@@ -134,11 +134,9 @@ void crop_image() {
         for (int j = y; j < h + y; j++) {
             for (int k = 0; k < 3; k++) {
                 // Copy pixel values from input image to cropped image
-                img_cropped(M, N, L) = img_in(i, j, k);
-                L++;
+                img_cropped(M, N, k) = img_in(i, j, k);
             }
             N++;
-            L = 0;
         }
         M++;
         N = 0;
@@ -309,6 +307,51 @@ int rotate_image_menu() {
     }
 }
 
+// Function to apply a "Wanno Day" filter to the input image
+void Wanno_Day() {
+    // Create a new image with the same dimensions as the input image
+    Image Wanno_Day_img(img_in.width, img_in.height);
+    // Loop through each pixel in the input image
+    for (int i = 0; i < img_in.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            // Adjust the red component of the pixel, ensuring it doesn't exceed 255
+            int Redt = min((img_in(i, j, 0) + 20), 255);
+            // Adjust the green component of the pixel, ensuring it doesn't exceed 255
+            int Gedt = min((img_in(i, j, 1) + 20), 255);
+            // Adjust the blue component of the pixel, ensuring it doesn't go below 0
+            int Bedt = max((img_in(i, j, 2) - 40), 0);
+            // Assign the adjusted color components to the corresponding pixel in the new image
+            Wanno_Day_img(i, j, 0) = Redt;
+            Wanno_Day_img(i, j, 1) = Gedt;
+            Wanno_Day_img(i, j, 2) = Bedt;
+        }
+    }
+    img_in = Wanno_Day_img;
+}
+
+// Function to apply a "Wanno Night" filter to the input image
+void Wanno_Night() {
+    // Create a new image with the same dimensions as the input image
+    Image Wanno_Night_img(img_in.width, img_in.height);
+    // Loop through each pixel in the input image
+    for (int i = 0; i < img_in.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            // Adjust the red component of the pixel, ensuring it doesn't exceed 255
+            int Redt = min((img_in(i, j, 0) + 20), 255);
+            // Adjust the green component of the pixel, ensuring it doesn't go below 0
+            int Gedt = max((img_in(i, j, 1) - 40), 0);
+            // Adjust the blue component of the pixel, ensuring it doesn't exceed 255
+            int Bedt = min((img_in(i, j, 2) + 20), 255);
+            
+            // Assign the adjusted color components to the corresponding pixel in the new image
+            Wanno_Night_img(i, j, 0) = Redt;
+            Wanno_Night_img(i, j, 1) = Gedt;
+            Wanno_Night_img(i, j, 2) = Bedt;
+        }
+    }
+    img_in = Wanno_Night_img;
+}
+
 // Function to invert the red channel of the input image
 void infera_red() {
     for (int i = 0; i < img_in.width; i++) {
@@ -399,10 +442,12 @@ int filters_menu() {
         cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate image\n";
-        cout << "G) Infera red\n";
-        cout << "H) Crop\n";
-        cout << "I) Clear All Filters\n";
-        cout << "J) Back to the Main menu\n";
+        cout << "G) Crop\n";
+        cout << "H) Wanno Day\n";
+        cout << "I) Wanno Night\n";
+        cout << "J) Infera red\n";
+        cout << "K) Clear All Filters\n";
+        cout << "L) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -426,16 +471,22 @@ int filters_menu() {
         } else if (filterschoice == "F") { // Apply Rotate image filter
             rotate_image_menu();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "G") { // Apply IR filter
-            infera_red();
-            cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "H") { // Apply Crop filter
+        } else if (filterschoice == "G") { // Apply Crop filter
             crop_image();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "I") { // Clear All Filters
+        } else if (filterschoice == "H") { // Apply Wanno Day filter
+            Wanno_Day();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "I") { // Apply Wanno Night filter
+            Wanno_Night();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "J") { // Apply IR filter
+            infera_red();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "K") { // Clear All Filters
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
-            cout << "All filters have been cleared!" << endl; // Inform the user that all filters have been cleared
-        } else if (filterschoice == "J") {
+            cout << "All filters have been cleared!" << endl;
+        } else if (filterschoice == "L") {
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
