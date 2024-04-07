@@ -143,7 +143,38 @@ void crop_image() {
     }
     img_in = img_cropped;
 }
+void Darken_and_Lighten_Image(){
+    string s;
+    while(true){
+        cout << "A) darken the image";
+        cout << "\nB) lighten the image\n";
+        cin >> s;
+        transform(s.begin(), s.end(), s.begin(), ::toupper); // Convert filter choice to uppercase
+        
+        if (s != "A" && s != "B") {
+            cout << "Invalid input. Please enter 'a' or 'b'." << endl;
+            continue;
+        } 
+        unsigned int n;
+        for (int i = 0; i < img_in.width; i++) {
+            for (int j = 0; j < img_in.height; j++) {
+                for (int k = 0; k < 3; k++) {
+                    if (s == "A") {
+                        img_in(i, j, k) /= 2;
+                    } else if (s == "B") {
 
+                        if(img_in(i,j,k)<=170){
+                            img_in(i, j, k) *= 1.5;
+                        }else{
+                            img_in(i,j,k)=255;
+                        }
+                    }
+                }
+            }
+        }
+        break;
+    }
+}
 // Function to invert the colors of the input image
 void invert_image() {
     // Iterate through each pixel in the image
@@ -155,6 +186,43 @@ void invert_image() {
             }
         }
     }
+}
+void detect_image_edge(){
+    for (int i = 0; i < img_in.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            int av = 0; // Initialize average value
+            // Calculate average pixel value across RGB channels
+            for (int k = 0; k < 3; k++) {
+                av += img_in(i, j, k);
+            }
+            av /= 3; // Compute the average
+            // Set each RGB channel to the average value
+            for (int k = 0; k < 3; k++) {
+                img_in(i, j, k) = av; 
+                // Convert to black and white based on threshold (128)
+                if (img_in(i, j, k) < 128) {
+                    img_in(i, j, k) = 0;
+                } else {
+                    img_in(i, j, k) = 255;
+                }
+            }
+        }
+    }
+    Image mazen(img_in.width, img_in.height);
+    for (int i = 1; i < img_in.width - 1; i++) {
+        for (int j = 0; j < img_in.height ; j++) {
+            for (int k = 0; k < 3; k++) {
+           
+                if((img_in(i,j,k)==0&&img_in(i-1,j,k)==255)||(img_in(i,j,k)==0&&img_in(i+1,j,k)==255)){
+                    mazen(i,j,k)=0;
+   
+                }else{
+                    mazen(i,j,k)=255;
+                }
+            }
+        }
+    }
+    mazen.saveImage("L.jpg");
 }
 
 // Function to merge the input image with another image
@@ -442,12 +510,14 @@ int filters_menu() {
         cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate image\n";
-        cout << "G) Crop\n";
-        cout << "H) Wanno Day\n";
-        cout << "I) Wanno Night\n";
-        cout << "J) Infera red\n";
-        cout << "K) Clear All Filters\n";
-        cout << "L) Back to the Main menu\n";
+        cout << "G) Darken and Lighten Image\n";
+        cout << "H) Crop\n";
+        cout << "I) Wanno Day\n";
+        cout << "J) detect image edge\n";
+        cout << "K) Wanno Night\n";
+        cout << "L) Infera red\n";
+        cout << "M) Clear All Filters\n";
+        cout << "N) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -472,21 +542,27 @@ int filters_menu() {
             rotate_image_menu();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "G") { // Apply Crop filter
+            Darken_and_Lighten_Image();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "H") { // Apply Crop filter
             crop_image();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "H") { // Apply Wanno Day filter
+        } else if (filterschoice == "I") { // Apply Wanno Day filter
             Wanno_Day();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "I") { // Apply Wanno Night filter
+        } else if (filterschoice == "J") { // Apply Crop filter
+            detect_image_edge();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "k") { // Apply Wanno Night filter
             Wanno_Night();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "J") { // Apply IR filter
+        } else if (filterschoice == "L") { // Apply IR filter
             infera_red();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "K") { // Clear All Filters
+        } else if (filterschoice == "M") { // Clear All Filters
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl;
-        } else if (filterschoice == "L") {
+        } else if (filterschoice == "N") {
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
