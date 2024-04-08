@@ -145,38 +145,40 @@ void crop_image() {
     img_in = img_cropped;
 }
 
+// Function to darken or lighten an image based on user choice
 int Darken_and_Lighten_Image() {
     string DorL_choice;
+    // Loop until a valid choice is entered
     while (true) {
+        // Display menu options to the user
         cout << "\n*** What do you want to do with your image? ***\n";
         cout << "================================================\n";
-        cout << "A) Darknen\n";
-        cout << "B) Brightnen\n";
+        cout << "A) Darken\n";
+        cout << "B) Brighten\n";
         cout << "C) Back to filters menu\n";
         cout << "================================================\n";
         cout << "Enter your choice: ";
         cin >> DorL_choice;
-        transform(DorL_choice.begin(), DorL_choice.end(), DorL_choice.begin(), ::toupper); // Convert filter choice to uppercase
+        // Check if the choice is valid, if not, prompt the user to enter a valid choice
+        transform(DorL_choice.begin(), DorL_choice.end(), DorL_choice.begin(), ::toupper);
         if (DorL_choice != "A" && DorL_choice != "B" && DorL_choice != "C") {
             cout << "Please enter a valid choice" << endl;
             continue;
         }
+        // If the user chooses to go back to the filters menu, return 0 to exit the function
         if (DorL_choice == "C") {
             return 0;
         }
         break;
     }
+    // Loop through each pixel in the image
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
                 if (DorL_choice == "A") {
-                    img_in(i, j, k) /= 2;
+                    img_in(i, j, k) /= 2; // Divide pixel value by 2 to darken
                 } else if (DorL_choice == "B") {
-                    if (img_in(i, j, k) <= 170) {
-                        img_in(i, j, k) *= 1.5;
-                    } else {
-                        img_in(i, j, k) = 255;
-                    }
+                    img_in(i, j, k) = min(int(img_in(i, j, k) * 1.5), 255); // Multiply pixel value by 1.5 to brighten
                 }
             }
         }
@@ -283,13 +285,10 @@ void blur() {
                 // Define region of pixels to be blurred
                 sc = max(i - r + 1, 1); ec = min(i + r + 1, w);
                 sr = max(j - r + 1, 1); er = min(j + r + 1, h);
-                
                 // Calculate sum of pixel values within the region
                 sum = cmlt[ec][er][k] - cmlt[ec][sr - 1][k] - cmlt[sc - 1][er][k] + cmlt[sc - 1][sr - 1][k];
-                
                 // Calculate average pixel value within the region
                 sum /= area;
-                
                 // Set blurred pixel value in the output image
                 blur_img(i - 1, j - 1, k) = min(sum, 255); // Clamp to maximum pixel value (255)
             }
@@ -298,7 +297,6 @@ void blur() {
     // Update the input image with the blurred image
     img_in = blur_img;
 }
-
 
 // Function to merge the input image with another image
 void merge_images() {
@@ -488,7 +486,7 @@ void Wanno_Night() {
 
 // Function to apply noise "Wanno TV" filter to the input image
 void Wanno_TV() {
-    srand (unsigned (time(0)));
+    srand(unsigned(time(0)));
     // Create a new image with the same dimensions as the input image
     Image Wanno_TV_img(img_in.width, img_in.height);
     // Loop through each pixel in the input image
@@ -496,7 +494,7 @@ void Wanno_TV() {
         for (int j = 0; j < img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
                 if (img_in(i, j, k) < 225) { // If pixel has vale more than  225 set it to its original value
-                    int randomvalue = rand()%26;
+                    int randomvalue = rand() % 26;
                     Wanno_TV_img(i, j, k) = img_in(i, j, k) + randomvalue; // add a random value  between 0 and 25 to make noise
                 } else {
                     Wanno_TV_img(i, j, k) = img_in(i, j, k);
@@ -635,7 +633,7 @@ int filters_menu() {
         } else if (filterschoice == "I") {
             blur();
             cout << "Operation completed successfully!" << endl;
-        }  else if (filterschoice == "J") {
+        } else if (filterschoice == "J") {
             detect_image_edge();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "K") {
