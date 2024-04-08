@@ -46,15 +46,6 @@ bool isNumeric(string str) {
     return true;
 }
 
-int random(int start, int end) {
-    // Create a random number generator engine
-    std::random_device rd;
-    std::mt19937 gen(rd());
-    std::uniform_int_distribution<int> distribution(start, end);
-    int random_number = distribution(gen);
-    return random_number;
-}
-
 // Function to convert the input image to grayscale
 void greyscale() {
     // Iterate through each pixel in the image
@@ -237,6 +228,77 @@ void detect_image_edge() {
     }
     img_in = Detected_edges;
 }
+
+void blur() {
+    // Declare variables
+    int r, sum, sr, er, sc, ec, area;
+    // Create a new image for the blurred result with the same dimensions as the input image
+    Image blur_img(img_in.width, img_in.height);
+    // Prompt the user to enter the blur radius
+    cout << "Enter the radius of the blur (the higher the stronger the effect is): ";
+    cin >> r;
+    // Store the width and height of the input image
+    int w = img_in.width;
+    int h = img_in.height;
+    // Initialize cumulative arrays for each color channel
+    int cmlt[w + 1][h + 1][3], row[w + 1][h + 1][3];
+    memset(cmlt, 0, sizeof cmlt); // Initialize cumulative arrays with zeros
+    memset(row, 0, sizeof row);    // Initialize row arrays with zeros
+    // Copy pixel values from input image to cumulative and row arrays
+    for (int i = 1; i <= w; ++i) {
+        for (int j = 1; j <= h; ++j) {
+            for (int k = 0; k < 3; ++k) {
+                cmlt[i][j][k] = row[i][j][k] = img_in(i, j, k); // Copy pixel values
+            }
+        }
+    }
+    // Calculate cumulative sum for each row
+    for (int i = 1; i <= w; i++) {
+        for (int j = 1; j <= h; j++) {
+            for (int k = 0; k < 3; k++) {
+                row[i][j][k] += row[i - 1][j][k]; // Add previous pixel value in row
+            }
+        }
+    }
+    // Calculate cumulative sum for each column
+    for (int i = 1; i <= h; i++) {
+        for (int j = 1; j <= w; j++) {
+            for (int k = 0; k < 3; k++) {
+                if (!i)
+                    cmlt[j][i][k] = row[j][i][k]; // First row cumulative sum is same as row value
+                else if (!j) {
+                    cmlt[j][i][k] += cmlt[j][i - 1][k]; // Add previous column value
+                } else {
+                    cmlt[j][i][k] = cmlt[j][i - 1][k] + row[j][i][k]; // Add previous row and column value
+                }
+            }
+        }
+    }
+    // Calculate area of the blur kernel
+    area = (2 * r + 1) * (2 * r + 1);
+    // Apply blur to each pixel
+    for (int i = 1; i <= w; i++) {
+        for (int j = 1; j <= h; j++) {
+            for (int k = 0; k < 3; k++) {
+                // Define region of pixels to be blurred
+                sc = max(i - r + 1, 1); ec = min(i + r + 1, w);
+                sr = max(j - r + 1, 1); er = min(j + r + 1, h);
+                
+                // Calculate sum of pixel values within the region
+                sum = cmlt[ec][er][k] - cmlt[ec][sr - 1][k] - cmlt[sc - 1][er][k] + cmlt[sc - 1][sr - 1][k];
+                
+                // Calculate average pixel value within the region
+                sum /= area;
+                
+                // Set blurred pixel value in the output image
+                blur_img(i - 1, j - 1, k) = min(sum, 255); // Clamp to maximum pixel value (255)
+            }
+        }
+    }
+    // Update the input image with the blurred image
+    img_in = blur_img;
+}
+
 
 // Function to merge the input image with another image
 void merge_images() {
@@ -426,6 +488,7 @@ void Wanno_Night() {
 
 // Function to apply noise "Wanno TV" filter to the input image
 void Wanno_TV() {
+    srand (unsigned (time(0)));
     // Create a new image with the same dimensions as the input image
     Image Wanno_TV_img(img_in.width, img_in.height);
     // Loop through each pixel in the input image
@@ -433,7 +496,8 @@ void Wanno_TV() {
         for (int j = 0; j < img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
                 if (img_in(i, j, k) < 225) { // If pixel has vale more than  225 set it to its original value
-                    Wanno_TV_img(i, j, k) = img_in(i, j, k) + random(0, 25); // add a random value  between 0 and 25 to make noise
+                    int randomvalue = rand()%26;
+                    Wanno_TV_img(i, j, k) = img_in(i, j, k) + randomvalue; // add a random value  between 0 and 25 to make noise
                 } else {
                     Wanno_TV_img(i, j, k) = img_in(i, j, k);
                 }
@@ -535,13 +599,14 @@ int filters_menu() {
         cout << "F) Rotate\n";
         cout << "G) Edit Brightness\n";
         cout << "H) Crop\n";
-        cout << "I) Detect image edges\n";
-        cout << "J) Wanno Day\n";
-        cout << "K) Wanno Night\n";
-        cout << "L) Wanno TV\n";
-        cout << "M) Infera red\n";
-        cout << "N) Clear All Filters\n";
-        cout << "O) Back to the Main menu\n";
+        cout << "I) Blur\n";
+        cout << "J) Detect image edges\n";
+        cout << "K) Wanno Day\n";
+        cout << "L) Wanno Night\n";
+        cout << "M) Wanno TV\n";
+        cout << "N) Infera red\n";
+        cout << "O) Clear All Filters\n";
+        cout << "P) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -568,24 +633,27 @@ int filters_menu() {
             crop_image();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "I") {
+            blur();
+            cout << "Operation completed successfully!" << endl;
+        }  else if (filterschoice == "J") {
             detect_image_edge();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "J") {
+        } else if (filterschoice == "K") {
             Wanno_Day();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "k") {
+        } else if (filterschoice == "L") {
             Wanno_Night();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "L") {
+        } else if (filterschoice == "M") {
             Wanno_TV();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "M") {
+        } else if (filterschoice == "N") {
             infera_red();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "N") {
+        } else if (filterschoice == "O") {
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl;
-        } else if (filterschoice == "O") {
+        } else if (filterschoice == "P") {
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
