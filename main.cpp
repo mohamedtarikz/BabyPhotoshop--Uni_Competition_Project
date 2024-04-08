@@ -9,7 +9,7 @@
 //  ********************************************************************************End Authors******************************************************************************
 //  TA: Ahmed Fouad
 //  Version: 2.0
-//  Last Modification Date: 28/03/2024
+//  Last Modification Date: 08/04/2024
 //  =============================================================================================================================================================================   //
 /*
                                                                 \\ Version 1 Notes //
@@ -31,6 +31,7 @@
 #include <algorithm>
 #include <string>
 #include <cmath>
+#include <random>
 #include "library/Image_Class.h"
 
 using namespace std;
@@ -43,6 +44,15 @@ bool isNumeric(string str) {
             return false; //when one non numeric value is found, return false
     }
     return true;
+}
+
+int random(int start, int end) {
+    // Create a random number generator engine
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<int> distribution(start, end);
+    int random_number = distribution(gen);
+    return random_number;
 }
 
 // Function to convert the input image to grayscale
@@ -102,10 +112,10 @@ void crop_image() {
         cout << "Enter starting Y Coordinate: ";
         cin >> Y;
         // Prompt user to enter the width of the crop area
-        cout << "Enter the width of crop area : ";
+        cout << "Enter the width of the cropped picture: ";
         cin >> W;
         // Prompt user to enter the height of the crop area
-        cout << "Enter the height of crop area : ";
+        cout << "Enter the height of the cropped picture: ";
         cin >> H;
         // Check if any input is not numeric
         if (!isNumeric(X) || !isNumeric(Y) || !isNumeric(W) || !isNumeric(H)) {
@@ -143,38 +153,47 @@ void crop_image() {
     }
     img_in = img_cropped;
 }
-void Darken_and_Lighten_Image(){
-    string s;
-    while(true){
-        cout << "A) darken the image";
-        cout << "\nB) lighten the image\n";
-        cin >> s;
-        transform(s.begin(), s.end(), s.begin(), ::toupper); // Convert filter choice to uppercase
-        
-        if (s != "A" && s != "B") {
-            cout << "Invalid input. Please enter 'a' or 'b'." << endl;
-            continue;
-        } 
-        unsigned int n;
-        for (int i = 0; i < img_in.width; i++) {
-            for (int j = 0; j < img_in.height; j++) {
-                for (int k = 0; k < 3; k++) {
-                    if (s == "A") {
-                        img_in(i, j, k) /= 2;
-                    } else if (s == "B") {
 
-                        if(img_in(i,j,k)<=170){
-                            img_in(i, j, k) *= 1.5;
-                        }else{
-                            img_in(i,j,k)=255;
-                        }
+int Darken_and_Lighten_Image() {
+    string DorL_choice;
+    while (true) {
+        cout << "\n*** What do you want to do with your image? ***\n";
+        cout << "================================================\n";
+        cout << "A) Darknen\n";
+        cout << "B) Brightnen\n";
+        cout << "C) Back to filters menu\n";
+        cout << "================================================\n";
+        cout << "Enter your choice: ";
+        cin >> DorL_choice;
+        transform(DorL_choice.begin(), DorL_choice.end(), DorL_choice.begin(), ::toupper); // Convert filter choice to uppercase
+        if (DorL_choice != "A" && DorL_choice != "B" && DorL_choice != "C") {
+            cout << "Please enter a valid choice" << endl;
+            continue;
+        }
+        if (DorL_choice == "C") {
+            return 0;
+        }
+        break;
+    }
+    for (int i = 0; i < img_in.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                if (DorL_choice == "A") {
+                    img_in(i, j, k) /= 2;
+                } else if (DorL_choice == "B") {
+                    if (img_in(i, j, k) <= 170) {
+                        img_in(i, j, k) *= 1.5;
+                    } else {
+                        img_in(i, j, k) = 255;
                     }
                 }
             }
         }
-        break;
     }
+    cout << "Operation completed successfully!" << endl;
+    return 0;
 }
+
 // Function to invert the colors of the input image
 void invert_image() {
     // Iterate through each pixel in the image
@@ -187,42 +206,36 @@ void invert_image() {
         }
     }
 }
-void detect_image_edge(){
+
+// Filter to detect image edges
+void detect_image_edge() {
+    // Convert input image to black and white
+    black_and_white();
+    Image Detected_edges(img_in.width, img_in.height);
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
-            int av = 0; // Initialize average value
-            // Calculate average pixel value across RGB channels
             for (int k = 0; k < 3; k++) {
-                av += img_in(i, j, k);
-            }
-            av /= 3; // Compute the average
-            // Set each RGB channel to the average value
-            for (int k = 0; k < 3; k++) {
-                img_in(i, j, k) = av; 
-                // Convert to black and white based on threshold (128)
-                if (img_in(i, j, k) < 128) {
-                    img_in(i, j, k) = 0;
+                // Check if the current pixel is not on the image border
+                if (i != 0 && i != img_in.width - 1 && j != 0 && j != img_in.height - 1) {
+                    // Check if the current pixel is black and any of its neighboring pixels are white
+                    if ((img_in(i, j, k) == 0 && img_in(i - 1, j, k) == 255) ||
+                        (img_in(i, j, k) == 0 && img_in(i + 1, j, k) == 255) ||
+                        (img_in(i, j, k) == 0 && img_in(i, j - 1, k) == 255) ||
+                        (img_in(i, j, k) == 0 && img_in(i, j + 1, k) == 255)) {
+                        // If any of the neighboring pixels are white, set the corresponding pixel in Detected_edges to black
+                        Detected_edges(i, j, k) = 0;
+                    } else {
+                        // If none of the neighboring pixels are white, set the corresponding pixel in Detected_edges to white
+                        Detected_edges(i, j, k) = 255;
+                    }
                 } else {
-                    img_in(i, j, k) = 255;
+                    // If the pixel is on the image border, retain its original color in Detected_edges
+                    Detected_edges(i, j, k) = img_in(i, j, k);
                 }
             }
         }
     }
-    Image mazen(img_in.width, img_in.height);
-    for (int i = 1; i < img_in.width - 1; i++) {
-        for (int j = 0; j < img_in.height ; j++) {
-            for (int k = 0; k < 3; k++) {
-           
-                if((img_in(i,j,k)==0&&img_in(i-1,j,k)==255)||(img_in(i,j,k)==0&&img_in(i+1,j,k)==255)){
-                    mazen(i,j,k)=0;
-   
-                }else{
-                    mazen(i,j,k)=255;
-                }
-            }
-        }
-    }
-    mazen.saveImage("L.jpg");
+    img_in = Detected_edges;
 }
 
 // Function to merge the input image with another image
@@ -290,7 +303,7 @@ void flip_vertically() {
 int flip_image_menu() {
     string flipchoice;
     while (true) {
-        cout << "\n*** How do you want to save your image? ***\n";
+        cout << "\n*** How do you want to flip your image? ***\n";
         cout << "===========================================\n";
         cout << "A) Flip horizontally\n";
         cout << "B) Flip vertically\n";
@@ -302,13 +315,16 @@ int flip_image_menu() {
         transform(flipchoice.begin(), flipchoice.end(), flipchoice.begin(), ::toupper);
         if (flipchoice == "A") {
             flip_horizontally();
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "B") {
             flip_vertically();
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "C") {
             flip_horizontally();
             flip_vertically();
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "D") {
             return 0;
@@ -356,16 +372,19 @@ int rotate_image_menu() {
             // Rotate the image 90 degrees clockwise
             flip_vertically();
             rotate_image_90deg();
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "B") {
             // Rotate the image 180 degrees
             flip_horizontally();
             flip_vertically();
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "C") {
             // Rotate the image 270 degrees clockwise
             flip_horizontally();
             rotate_image_90deg();
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (flipchoice == "D") {
             return 0;
@@ -382,16 +401,9 @@ void Wanno_Day() {
     // Loop through each pixel in the input image
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
-            // Adjust the red component of the pixel, ensuring it doesn't exceed 255
-            int Redt = min((img_in(i, j, 0) + 20), 255);
-            // Adjust the green component of the pixel, ensuring it doesn't exceed 255
-            int Gedt = min((img_in(i, j, 1) + 20), 255);
-            // Adjust the blue component of the pixel, ensuring it doesn't go below 0
-            int Bedt = max((img_in(i, j, 2) - 40), 0);
-            // Assign the adjusted color components to the corresponding pixel in the new image
-            Wanno_Day_img(i, j, 0) = Redt;
-            Wanno_Day_img(i, j, 1) = Gedt;
-            Wanno_Day_img(i, j, 2) = Bedt;
+            Wanno_Day_img(i, j, 0) = min((img_in(i, j, 0) + 20), 255);
+            Wanno_Day_img(i, j, 1) = min((img_in(i, j, 1) + 20), 255);
+            Wanno_Day_img(i, j, 2) = max((img_in(i, j, 2) - 40), 0);
         }
     }
     img_in = Wanno_Day_img;
@@ -404,20 +416,31 @@ void Wanno_Night() {
     // Loop through each pixel in the input image
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
-            // Adjust the red component of the pixel, ensuring it doesn't exceed 255
-            int Redt = min((img_in(i, j, 0) + 20), 255);
-            // Adjust the green component of the pixel, ensuring it doesn't go below 0
-            int Gedt = max((img_in(i, j, 1) - 40), 0);
-            // Adjust the blue component of the pixel, ensuring it doesn't exceed 255
-            int Bedt = min((img_in(i, j, 2) + 20), 255);
-            
-            // Assign the adjusted color components to the corresponding pixel in the new image
-            Wanno_Night_img(i, j, 0) = Redt;
-            Wanno_Night_img(i, j, 1) = Gedt;
-            Wanno_Night_img(i, j, 2) = Bedt;
+            Wanno_Night_img(i, j, 0) = min((img_in(i, j, 0) + 20), 255);
+            Wanno_Night_img(i, j, 1) = max((img_in(i, j, 1) - 40), 0);
+            Wanno_Night_img(i, j, 2) = min((img_in(i, j, 2) + 20), 255);
         }
     }
     img_in = Wanno_Night_img;
+}
+
+// Function to apply noise "Wanno TV" filter to the input image
+void Wanno_TV() {
+    // Create a new image with the same dimensions as the input image
+    Image Wanno_TV_img(img_in.width, img_in.height);
+    // Loop through each pixel in the input image
+    for (int i = 0; i < img_in.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                if (img_in(i, j, k) < 225) { // If pixel has vale more than  225 set it to its original value
+                    Wanno_TV_img(i, j, k) = img_in(i, j, k) + random(0, 25); // add a random value  between 0 and 25 to make noise
+                } else {
+                    Wanno_TV_img(i, j, k) = img_in(i, j, k);
+                }
+            }
+        }
+    }
+    img_in = Wanno_TV_img;
 }
 
 // Function to invert the red channel of the input image
@@ -455,7 +478,7 @@ int insert() {
 
 // Function to provide options for saving an image
 int save(Image img_save) {
-    string savechoice; // Variable to store user's save choice
+    string savechoice;
     while (true) {
         cout << "\n*** How do you want to save your image? ***\n";
         cout << "===========================================\n";
@@ -464,29 +487,29 @@ int save(Image img_save) {
         cout << "C) Back to the Main menu\n";
         cout << "===========================================\n";
         cout << "Enter your choice: ";
-        cin >> savechoice; // Read user's save choice
-        transform(savechoice.begin(), savechoice.end(), savechoice.begin(), ::toupper); // Convert save choice to uppercase
+        cin >> savechoice;
+        transform(savechoice.begin(), savechoice.end(), savechoice.begin(), ::toupper);
         // Process user's save choice
-        if (savechoice == "A") { // Save as a new image
-            string outimg; // Variable to store output image name
+        if (savechoice == "A") {
+            string outimg;
             while (true) { // Loop until a valid output image name is provided
                 try {
                     cout << "\nPlease enter image name with its extension: ";
-                    cin >> outimg; // Read output image name from user input
-                    img_save.saveImage(outimg); // Attempt to save the image
-                    break; // Exit the loop if image saving is successful
-                } catch (invalid_argument) { // Catch exception if image saving fails
-                    continue; // Continue to prompt the user for a valid output image name
+                    cin >> outimg;
+                    img_save.saveImage(outimg);
+                    break;
+                } catch (invalid_argument) {
+                    continue;
                 }
             }
             return 0;
-        } else if (savechoice == "B") { // Replace the existing image
-            while (true) { // Loop until image saving is successful
+        } else if (savechoice == "B") {
+            while (true) {
                 try {
-                    img_save.saveImage(imginput); // Attempt to save the image with the original input image name
-                    break; // Exit the loop if image saving is successful
-                } catch (invalid_argument) { // Catch exception if image saving fails
-                    continue; // Continue to attempt image saving
+                    img_save.saveImage(imginput);
+                    break;
+                } catch (invalid_argument) {
+                    continue;
                 }
             }
             return 0;
@@ -500,69 +523,69 @@ int save(Image img_save) {
 
 // Function to display the filters menu and apply selected filters
 int filters_menu() {
-    string filterschoice; // Variable to store user's filter choice
+    string filterschoice;
     while (true) {
         cout << "\n*** Filters Menu ***\n";
         cout << "========================\n";
         cout << "A) Grey scale\n";
         cout << "B) Black and White\n";
-        cout << "C) Invert image\n";
+        cout << "C) Invert colors\n";
         cout << "D) Merge\n";
         cout << "E) Flip\n";
-        cout << "F) Rotate image\n";
-        cout << "G) Darken and Lighten Image\n";
+        cout << "F) Rotate\n";
+        cout << "G) Edit Brightness\n";
         cout << "H) Crop\n";
-        cout << "I) Wanno Day\n";
-        cout << "J) detect image edge\n";
+        cout << "I) Detect image edges\n";
+        cout << "J) Wanno Day\n";
         cout << "K) Wanno Night\n";
-        cout << "L) Infera red\n";
-        cout << "M) Clear All Filters\n";
-        cout << "N) Back to the Main menu\n";
+        cout << "L) Wanno TV\n";
+        cout << "M) Infera red\n";
+        cout << "N) Clear All Filters\n";
+        cout << "O) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
         transform(filterschoice.begin(), filterschoice.end(), filterschoice.begin(), ::toupper); // Convert filter choice to uppercase
-        // Process user's filter choice
-        if (filterschoice == "A") { // Apply Grey scale filter
+        if (filterschoice == "A") {
             greyscale();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "B") { // Apply Black and White filter
+        } else if (filterschoice == "B") {
             black_and_white();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "C") { // Apply Invert image filter
+        } else if (filterschoice == "C") {
             invert_image();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "D") { // Apply Merge filter
+        } else if (filterschoice == "D") {
             merge_images();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "E") { // Apply Flip filter
+        } else if (filterschoice == "E") {
             flip_image_menu();
-            cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "F") { // Apply Rotate image filter
+        } else if (filterschoice == "F") {
             rotate_image_menu();
-            cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "G") { // Apply Crop filter
+        } else if (filterschoice == "G") {
             Darken_and_Lighten_Image();
-            cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "H") { // Apply Crop filter
+        } else if (filterschoice == "H") {
             crop_image();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "I") { // Apply Wanno Day filter
-            Wanno_Day();
-            cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "J") { // Apply Crop filter
+        } else if (filterschoice == "I") {
             detect_image_edge();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "k") { // Apply Wanno Night filter
+        } else if (filterschoice == "J") {
+            Wanno_Day();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "k") {
             Wanno_Night();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "L") { // Apply IR filter
+        } else if (filterschoice == "L") {
+            Wanno_TV();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "M") {
             infera_red();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "M") { // Clear All Filters
+        } else if (filterschoice == "N") {
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl;
-        } else if (filterschoice == "N") {
+        } else if (filterschoice == "O") {
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
@@ -586,15 +609,15 @@ int main() {
         cin >> choice; // Read user's main menu choice
         transform(choice.begin(), choice.end(), choice.begin(), ::toupper); // Convert main menu choice to uppercase
         // Process user's main menu choice
-        if (choice == "A") { // Insert image
+        if (choice == "A") {
             insert();
             cout << "Image Inserted!" << endl;
-        } else if (choice == "B") { // Apply filters
+        } else if (choice == "B") {
             filters_menu();
-        } else if (choice == "C") { // Save image
+        } else if (choice == "C") {
             save(img_in);
             cout << "Image Saved!" << endl;
-        } else if (choice == "D") { // Exit the program
+        } else if (choice == "D") {
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
