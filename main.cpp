@@ -461,6 +461,63 @@ void infera_red() {
     }
 }
 
+void blur(){
+    int r,sum,sr,er,sc,ec,area;
+    cout << "Enter the radius of the blur (the higher the stronger the effect is): ";
+    cin>>r;
+    int w = img_in.width;
+    int h = img_in.height;
+    int cmlt[w+1][h+1][3], row[w+1][h+1][3];
+    Image b = img_in;
+    memset(cmlt,0,sizeof cmlt);
+    memset(row,0,sizeof row);
+    for (int i = 1; i <= w; ++i) {
+        for (int j = 1; j <= h; ++j) {
+            for (int k = 0; k < 3; ++k) {
+                cmlt[i][j][k] = row[i][j][k] = img_in(i,j,k);
+            }
+        }
+    }
+
+    for (int i = 1; i <= w; i++) {
+        for (int j = 1; j <= h; j++) {
+            for (int k = 0; k < 3; k++) {
+                row[i][j][k]+=row[i-1][j][k];
+            }
+        }
+    }
+
+    for (int i = 1; i <= h; i++) {
+        for (int j = 1; j <= w; j++) {
+            for (int k = 0; k < 3; k++) {
+                if(!i)
+                    cmlt[j][i][k]=row[j][i][k];
+                else if(!j){
+                    cmlt[j][i][k]+=cmlt[j][i-1][k];
+                }
+                else{
+                    cmlt[j][i][k]=cmlt[j][i-1][k]+row[j][i][k];
+                }
+            }
+        }
+    }
+
+    area = (2*r+1)*(2*r+1);
+    for (int i = 1; i <= w; i++) {
+        for (int j = 1; j <= h; j++) {
+            for (int k = 0; k < 3; k++) {
+                sc = max(i-r+1,1); ec = min(i+r+1,w);
+                sr = max(j-r+1,1); er = min(j+r+1,h);
+                sum = cmlt[ec][er][k] - cmlt[ec][sr-1][k] - cmlt[sc-1][er][k] + cmlt[sc-1][sr-1][k];
+                sum/=area;
+                b(i-1,j-1,k) = min(sum,255);
+            }
+        }
+    }
+
+    b.saveImage("blur.jpg");
+}
+
 // Function to prompt the user to enter an image name with its extension and load the image
 int insert() {
     while (true) { // Loop until a valid image is loaded
@@ -577,7 +634,7 @@ int filters_menu() {
             Wanno_Night();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "L") {
-            Wanno_TV();
+            blur();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "M") {
             infera_red();
