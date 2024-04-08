@@ -270,7 +270,7 @@ void blur() {
                     cmlt[j][i][k] = row[j][i][k]; // First row cumulative sum is same as row value
                 else if (!j) {
                     cmlt[j][i][k] += cmlt[j][i - 1][k]; // Add previous column value
-                } else {
+                }else {
                     cmlt[j][i][k] = cmlt[j][i - 1][k] + row[j][i][k]; // Add previous row and column value
                 }
             }
@@ -523,6 +523,57 @@ void infera_red() {
     }
 }
 
+void pixelate() {
+    int r;
+    cout<<"Enter radius of pixelation(the more the stronger the effect) (0 - 10): ";
+    cin>>r;
+    Image pixels(img_in.width, img_in.height);
+    for (int i = 0; i < img_in.width; i+=r) {
+        for (int j = 0; j < img_in.height; j+=r) {
+            for (int k = 0; k < 3; k++) {
+                unsigned char x = img_in(i,j,k);
+                for (int l = 0; l < r; ++l) {
+                    for (int m = 0; m < r; ++m) {
+                        x = max((int)x,(int)img_in(min(i+l,img_in.width-1),min(j+m,img_in.height-1),k));
+                    }
+                }
+                for (int l = 0; l < r; ++l) {
+                    for (int m = 0; m < r; ++m) {
+                        pixels(min(i+l,img_in.width-1),min(j+m,img_in.height-1),k)=x;
+                    }
+                }
+            }
+        }
+    }
+    pixels.saveImage("s.jpg");
+}
+
+void oil_painted() {
+     Image oil_painted(img_in.width, img_in.height);
+     for (int i = 0; i < img_in.width; i++) {
+         for (int j = 0; j < img_in.height; j++) {
+             for (int k = 0; k < 3; k++) {
+                 unsigned char max_value = img_in(i, j, k);
+                 // Check right neighbor
+                 if (i < img_in.width - 1 && img_in(i + 1, j, k) > max_value) {
+                     max_value = img_in(i + 1, j, k);
+                 }
+
+                 // Check bottom neighbor
+                 if (j < img_in.height - 1 && img_in(i, j + 1, k) > max_value) {
+                     max_value = img_in(i, j + 1, k);
+                 }
+                 // Check bottom-right neighbor
+                 if (i < img_in.width - 1 && j < img_in.height - 1 && img_in(i + 1, j + 1, k) > max_value) {
+                     max_value = img_in(i + 1, j + 1, k);
+                 }
+                 oil_painted(i, j, k) = max_value;
+             }
+         }
+     }
+     oil_painted.saveImage("s.png");
+}
+
 // Function to prompt the user to enter an image name with its extension and load the image
 int insert() {
     while (true) { // Loop until a valid image is loaded
@@ -626,7 +677,7 @@ int filters_menu() {
         } else if (filterschoice == "F") {
             rotate_image_menu();
         } else if (filterschoice == "G") {
-            Darken_and_Lighten_Image();
+            oil_painted();
         } else if (filterschoice == "H") {
             crop_image();
             cout << "Operation completed successfully!" << endl;
