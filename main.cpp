@@ -646,16 +646,17 @@ int filters_menu() {
         cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate\n";
-        cout << "G) Edit Brightness\n";
-        cout << "H) Crop\n";
-        cout << "I) Blur\n";
-        cout << "J) Detect image edges\n";
-        cout << "K) Wanno Day\n";
-        cout << "L) Wanno Night\n";
-        cout << "M) Wanno TV\n";
-        cout << "N) Infera red\n";
-        cout << "O) Clear All Filters\n";
-        cout << "P) Back to the Main menu\n";
+        cout << "G) oil painted\n";
+        cout << "H) Edit Brightness\n";
+        cout << "I) Crop\n";
+        cout << "J) Blur\n";
+        cout << "K) Detect image edges\n";
+        cout << "L) Wanno Day\n";
+        cout << "M) Wanno Night\n";
+        cout << "N) Wanno TV\n";
+        cout << "O) Infera red\n";
+        cout << "P) Clear All Filters\n";
+        cout << "Q) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -674,35 +675,41 @@ int filters_menu() {
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "E") {
             flip_image_menu();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "F") {
             rotate_image_menu();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "G") {
             oil_painted();
-        } else if (filterschoice == "H") {
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "H"){
+            Darken_and_Lighten_Image();
+            cout << "Operation completed successfully!" << endl;
+        }else if (filterschoice == "I") {
             crop_image();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "I") {
+        } else if (filterschoice == "J") {
             blur();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "J") {
+        } else if (filterschoice == "K") {
             detect_image_edge();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "K") {
+        } else if (filterschoice == "L") {
             Wanno_Day();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "L") {
+        } else if (filterschoice == "M") {
             Wanno_Night();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "M") {
+        } else if (filterschoice == "N") {
             Wanno_TV();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "N") {
+        } else if (filterschoice == "O") {
             infera_red();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "O") {
+        } else if (filterschoice == "P") {
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl;
-        } else if (filterschoice == "P") {
+        } else if (filterschoice == "Q") {
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
