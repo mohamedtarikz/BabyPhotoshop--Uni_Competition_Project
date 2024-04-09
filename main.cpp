@@ -67,19 +67,12 @@ void greyscale() {
 
 // Function to convert the input image to black and white
 void black_and_white() {
-    // Iterate through each pixel in the image
+    // Convert the input image to grayscale
+    greyscale();
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
-            int av = 0; // Initialize average value
-            // Calculate average pixel value across RGB channels
+            // Set the color of the pixel to max white or black
             for (int k = 0; k < 3; k++) {
-                av += img_in(i, j, k);
-            }
-            av /= 3; // Compute the average
-            // Set each RGB channel to the average value
-            for (int k = 0; k < 3; k++) {
-                img_in(i, j, k) = av;
-                // Convert to black and white based on threshold (128)
                 if (img_in(i, j, k) < 128) {
                     img_in(i, j, k) = 0;
                 } else {
@@ -146,7 +139,7 @@ void crop_image() {
 }
 
 // Function to darken or lighten an image based on user choice
-int Darken_and_Lighten_Image() {
+int edit_brightness() {
     string DorL_choice;
     // Loop until a valid choice is entered
     while (true) {
@@ -493,11 +486,11 @@ void Wanno_TV() {
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
-                if (img_in(i, j, k) < 225) { // If pixel has vale more than  225 set it to its original value
-                    int randomvalue = rand() % 26;
-                    Wanno_TV_img(i, j, k) = img_in(i, j, k) + randomvalue; // add a random value  between 0 and 25 to make noise
+                int randomvalue = rand() % 21;
+                if (img_in(i, j, k) > 20) { // If pixel has vale more than  225 set it to its original value
+                    Wanno_TV_img(i, j, k) = min(int((img_in(i, j, k) - randomvalue) * 1.07), 255); // subtract a random value  between 1 and 20 to make noise
                 } else {
-                    Wanno_TV_img(i, j, k) = img_in(i, j, k);
+                    Wanno_TV_img(i, j, k) = img_in(i, j, k) + 1;
                 }
             }
         }
@@ -521,6 +514,17 @@ void infera_red() {
             }
         }
     }
+}
+
+void oil_paint() {
+    Image oil_painted(img_in.width, img_in.height);
+    for (int i = 1; i < img_in.width - 1; i++) {
+        for (int j = 0; j < img_in.height - 1; j++) {
+            for (int k = 0; k < 3; k++) {
+            }
+        }
+    }
+    oil_painted.saveImage("s.png");
 }
 
 // Function to prompt the user to enter an image name with its extension and load the image
@@ -595,16 +599,22 @@ int filters_menu() {
         cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate\n";
-        cout << "G) Edit Brightness\n";
-        cout << "H) Crop\n";
-        cout << "I) Blur\n";
-        cout << "J) Detect image edges\n";
-        cout << "K) Wanno Day\n";
-        cout << "L) Wanno Night\n";
-        cout << "M) Wanno TV\n";
-        cout << "N) Infera red\n";
-        cout << "O) Clear All Filters\n";
-        cout << "P) Back to the Main menu\n";
+        cout << "G) - Skew\n";
+        cout << "H) Edit Brightness\n";
+        cout << "I) - Resize\n";
+        cout << "J) Crop\n";
+        cout << "K) Blur\n";
+        cout << "L) Pixlate\n";
+        cout << "M) Detect image edges\n";
+        cout << "N) - Frame\n";
+        cout << "O) Wanno Day\n";
+        cout << "P) Wanno Night\n";
+        cout << "Q) Wanno TV\n";
+        cout << "R) Infera red\n";
+        cout << "S) - Oil painting\n";
+        cout << "T) - Bouns 2\n";
+        cout << "U) Clear All Filters\n";
+        cout << "V) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -626,32 +636,48 @@ int filters_menu() {
         } else if (filterschoice == "F") {
             rotate_image_menu();
         } else if (filterschoice == "G") {
-            Darken_and_Lighten_Image();
-        } else if (filterschoice == "H") {
-            crop_image();
+            // Skew();
             cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "H") {
+            edit_brightness();
         } else if (filterschoice == "I") {
-            blur();
+            // resize();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "J") {
-            detect_image_edge();
+            crop_image();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "K") {
-            Wanno_Day();
+            blur();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "L") {
-            Wanno_Night();
+            // pixlate();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "M") {
-            Wanno_TV();
+            detect_image_edge();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "N") {
+            // frame();
+        } else if (filterschoice == "O") {
+            Wanno_Day();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "P") {
+            Wanno_Night();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "Q") {
+            Wanno_TV();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "R") {
             infera_red();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "O") {
+        } else if (filterschoice == "S") {
+            oil_paint();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "T") {
+            // bouns2();
+        } else if (filterschoice == "U") {
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl;
-        } else if (filterschoice == "P") {
+        } else if (filterschoice == "V") {
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
