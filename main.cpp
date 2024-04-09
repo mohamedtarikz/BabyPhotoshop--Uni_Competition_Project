@@ -87,6 +87,7 @@ void black_and_white() {
 void crop_image() {
     // Declare variables to store user input for coordinates and dimensions
     string X, Y, W, H;
+    int x,y,w,h;
     // Continue prompting for input until valid values are provided
     while (true) {
         // Prompt user to enter starting X coordinate
@@ -107,7 +108,11 @@ void crop_image() {
             continue;
         }
         // Convert input strings to integers
-        int x = stoi(X), y = stoi(Y), w = stoi(W), h = stoi(H);
+        try{
+            x = stoi(X), y = stoi(Y), w = stoi(W), h = stoi(H);
+        } catch(out_of_range) {
+            cout << "Coordinates are out of bounds." << endl;
+        }
         // Check if the specified crop area is within the bounds of the image
         if (x > img_in.width || y > img_in.height || w > img_in.width - x || h > img_in.height - y) {
             cout << "Coordinates are out of bounds." << endl;
@@ -117,8 +122,6 @@ void crop_image() {
             break;
         }
     }
-    // Convert input strings to integers after validation
-    int x = stoi(X), y = stoi(Y), w = stoi(W), h = stoi(H);
     // Initialize variables for iterating through cropped image
     int M = 0, N = 0;
     // Create a new image to store the cropped region
@@ -224,26 +227,59 @@ void detect_edge() {
     img_in = img_Detected_edges;
 }
 
+// Filter to blur image
 void blur() {
     // Declare variables
-    int r, sum, sr, er, sc, ec, area;
+    string R;
+    int r, sr, er, sc, ec;
+    long long int sum, area;
     // Create a new image for the blurred result with the same dimensions as the input image
-    Image img_blured(img_in.width, img_in.height);
+    Image blur_img(img_in.width, img_in.height);
     // Prompt the user to enter the blur radius
-    cout << "Enter the radius of the blur (the higher the stronger the effect is): ";
-    cin >> r;
+    while (true) {
+        // Prompt user to enter starting X coordinate
+        cout << "Enter the strength of the blur (3 - 100): ";
+        cin >> R;
+        // Convert input strings to integers
+        // Check if any input is not numeric
+        if (!isNumeric(R)) {
+            cout << "Invalid input! Please enter positive integer values." << endl;
+            continue;
+        }
+        try {
+            r = stoi(R);
+        } catch (out_of_range) {
+            cout << "Invalid input! Please enter a number within the range." << endl;
+        }
+        if (r > 100 || r < 3) {
+            cout << "Invalid input! Please enter a number within the range." << endl;
+            continue;
+        } else {
+            // Break out of the loop if input is valid
+            break;
+        }
+    }
     // Store the width and height of the input image
     int w = img_in.width;
     int h = img_in.height;
-    // Initialize cumulative arrays for each color channel
-    int cmlt[w + 1][h + 1][3], row[w + 1][h + 1][3];
-    memset(cmlt, 0, sizeof cmlt); // Initialize cumulative arrays with zeros
-    memset(row, 0, sizeof row);    // Initialize row arrays with zeros
+    // Initialize cumulative arrays for each color channel using dynamic memory allocation
+    long long int*** commulative_sum = new long long int** [w + 1];
+    long long int*** commulative_sum_rows = new long long int** [w + 1];
+    for (int i = 0; i <= w; ++i) {
+        commulative_sum[i] = new long long int* [h + 1];
+        commulative_sum_rows[i] = new long long int* [h + 1];
+        for (int j = 0; j <= h; ++j) {
+            commulative_sum[i][j] = new long long int[3];
+            commulative_sum_rows[i][j] = new long long int[3];
+            memset(commulative_sum[i][j], 0, sizeof(long long int) * 3); // Initialize cumulative arrays with zeros
+            memset(commulative_sum_rows[i][j], 0, sizeof(long long int) * 3);    // Initialize row arrays with zeros
+        }
+    }
     // Copy pixel values from input image to cumulative and row arrays
     for (int i = 1; i <= w; ++i) {
         for (int j = 1; j <= h; ++j) {
             for (int k = 0; k < 3; ++k) {
-                cmlt[i][j][k] = row[i][j][k] = img_in(i, j, k); // Copy pixel values
+                commulative_sum[i][j][k] = commulative_sum_rows[i][j][k] = img_in(i - 1, j - 1, k); // Copy pixel values
             }
         }
     }
@@ -251,7 +287,7 @@ void blur() {
     for (int i = 1; i <= w; i++) {
         for (int j = 1; j <= h; j++) {
             for (int k = 0; k < 3; k++) {
-                row[i][j][k] += row[i - 1][j][k]; // Add previous pixel value in row
+                commulative_sum_rows[i][j][k] += commulative_sum_rows[i - 1][j][k]; // Add previous pixel value in row
             }
         }
     }
@@ -260,35 +296,45 @@ void blur() {
         for (int j = 1; j <= w; j++) {
             for (int k = 0; k < 3; k++) {
                 if (!i)
-                    cmlt[j][i][k] = row[j][i][k]; // First row cumulative sum is same as row value
+                    commulative_sum[j][i][k] = commulative_sum_rows[j][i][k]; // First row cumulative sum is same as row value
                 else if (!j) {
-                    cmlt[j][i][k] += cmlt[j][i - 1][k]; // Add previous column value
+                    commulative_sum[j][i][k] += commulative_sum[j][i - 1][k]; // Add previous column value
                 } else {
-                    cmlt[j][i][k] = cmlt[j][i - 1][k] + row[j][i][k]; // Add previous row and column value
+                    commulative_sum[j][i][k] = commulative_sum[j][i - 1][k] + commulative_sum_rows[j][i][k]; // Add previous row and column value
                 }
             }
         }
     }
-    // Calculate area of the blur kernel
-    area = (2 * r + 1) * (2 * r + 1);
     // Apply blur to each pixel
     for (int i = 1; i <= w; i++) {
         for (int j = 1; j <= h; j++) {
             for (int k = 0; k < 3; k++) {
                 // Define region of pixels to be blurred
-                sc = max(i - r + 1, 1); ec = min(i + r + 1, w);
-                sr = max(j - r + 1, 1); er = min(j + r + 1, h);
+                sc = max(i - r, 1); ec = min(i + r, w);
+                sr = max(j - r, 1); er = min(j + r, h);
+                area = ((er - sr) * (ec - sc));
                 // Calculate sum of pixel values within the region
-                sum = cmlt[ec][er][k] - cmlt[ec][sr - 1][k] - cmlt[sc - 1][er][k] + cmlt[sc - 1][sr - 1][k];
+                sum = commulative_sum[ec][er][k] - commulative_sum[ec][sr - 1][k] - commulative_sum[sc - 1][er][k] + commulative_sum[sc - 1][sr - 1][k];
                 // Calculate average pixel value within the region
                 sum /= area;
                 // Set blurred pixel value in the output image
-                img_blured(i - 1, j - 1, k) = min(sum, 255); // Clamp to maximum pixel value (255)
+                blur_img(i - 1, j - 1, k) = (sum <= 255 ? sum : 255); // Clamp to maximum pixel value (255)
             }
         }
     }
     // Update the input image with the blurred image
-    img_in = img_blured;
+    img_in = blur_img;
+    // Deallocate memory
+    for (int i = 0; i <= w; ++i) {
+        for (int j = 0; j <= h; ++j) {
+            delete[] commulative_sum[i][j];
+            delete[] commulative_sum_rows[i][j];
+        }
+        delete[] commulative_sum[i];
+        delete[] commulative_sum_rows[i];
+    }
+    delete[] commulative_sum;
+    delete[] commulative_sum_rows;
 }
 
 // Function to merge the input image with another image
@@ -642,7 +688,7 @@ int filters_menu() {
         cout << "H) Edit Brightness\n";
         cout << "I) - Resize\n";
         cout << "J) Crop\n";
-        cout << "K) - Blur\n";
+        cout << "K) Blur\n";
         cout << "L) Pixlate\n";
         cout << "M) Detect image edges\n";
         cout << "N) - Frame\n";
