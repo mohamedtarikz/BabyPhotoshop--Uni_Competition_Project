@@ -642,7 +642,7 @@ int filters_menu() {
         cout << "H) Edit Brightness\n";
         cout << "I) - Resize\n";
         cout << "J) Crop\n";
-        cout << "K) Blur\n";
+        cout << "K) - Blur\n";
         cout << "L) Pixlate\n";
         cout << "M) Detect image edges\n";
         cout << "N) - Frame\n";
@@ -689,7 +689,7 @@ int filters_menu() {
             blur();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "L") {
-            // pixlate();
+            pixelate();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "M") {
             detect_edge();
