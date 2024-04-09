@@ -263,7 +263,7 @@ void blur() {
                     cmlt[j][i][k] = row[j][i][k]; // First row cumulative sum is same as row value
                 else if (!j) {
                     cmlt[j][i][k] += cmlt[j][i - 1][k]; // Add previous column value
-                } else {
+                }else {
                     cmlt[j][i][k] = cmlt[j][i - 1][k] + row[j][i][k]; // Add previous row and column value
                 }
             }
@@ -516,15 +516,55 @@ void infera_red() {
     }
 }
 
-void oil_paint() {
-    Image oil_painted(img_in.width, img_in.height);
-    for (int i = 1; i < img_in.width - 1; i++) {
-        for (int j = 0; j < img_in.height - 1; j++) {
+void pixelate() {
+    int r;
+    cout<<"Enter radius of pixelation(the more the stronger the effect) (0 - 10): ";
+    cin>>r;
+    Image pixels(img_in.width, img_in.height);
+    for (int i = 0; i < img_in.width; i+=r) {
+        for (int j = 0; j < img_in.height; j+=r) {
             for (int k = 0; k < 3; k++) {
+                unsigned char x = img_in(i,j,k);
+                for (int l = 0; l < r; ++l) {
+                    for (int m = 0; m < r; ++m) {
+                        x = max((int)x,(int)img_in(min(i+l,img_in.width-1),min(j+m,img_in.height-1),k));
+                    }
+                }
+                for (int l = 0; l < r; ++l) {
+                    for (int m = 0; m < r; ++m) {
+                        pixels(min(i+l,img_in.width-1),min(j+m,img_in.height-1),k)=x;
+                    }
+                }
             }
         }
     }
-    oil_painted.saveImage("s.png");
+    pixels.saveImage("s.jpg");
+}
+
+void oil_painted() {
+     Image oil_painted(img_in.width, img_in.height);
+     for (int i = 0; i < img_in.width; i++) {
+         for (int j = 0; j < img_in.height; j++) {
+             for (int k = 0; k < 3; k++) {
+                 unsigned char max_value = img_in(i, j, k);
+                 // Check right neighbor
+                 if (i < img_in.width - 1 && img_in(i + 1, j, k) > max_value) {
+                     max_value = img_in(i + 1, j, k);
+                 }
+
+                 // Check bottom neighbor
+                 if (j < img_in.height - 1 && img_in(i, j + 1, k) > max_value) {
+                     max_value = img_in(i, j + 1, k);
+                 }
+                 // Check bottom-right neighbor
+                 if (i < img_in.width - 1 && j < img_in.height - 1 && img_in(i + 1, j + 1, k) > max_value) {
+                     max_value = img_in(i + 1, j + 1, k);
+                 }
+                 oil_painted(i, j, k) = max_value;
+             }
+         }
+     }
+     oil_painted.saveImage("s.png");
 }
 
 // Function to prompt the user to enter an image name with its extension and load the image
@@ -599,22 +639,16 @@ int filters_menu() {
         cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate\n";
-        cout << "G) - Skew\n";
-        cout << "H) Edit Brightness\n";
-        cout << "I) - Resize\n";
-        cout << "J) Crop\n";
-        cout << "K) Blur\n";
-        cout << "L) Pixlate\n";
-        cout << "M) Detect image edges\n";
-        cout << "N) - Frame\n";
-        cout << "O) Wanno Day\n";
-        cout << "P) Wanno Night\n";
-        cout << "Q) Wanno TV\n";
-        cout << "R) Infera red\n";
-        cout << "S) - Oil painting\n";
-        cout << "T) - Bouns 2\n";
-        cout << "U) Clear All Filters\n";
-        cout << "V) Back to the Main menu\n";
+        cout << "G) Edit Brightness\n";
+        cout << "H) Crop\n";
+        cout << "I) Blur\n";
+        cout << "J) Detect image edges\n";
+        cout << "K) Wanno Day\n";
+        cout << "L) Wanno Night\n";
+        cout << "M) Wanno TV\n";
+        cout << "N) Infera red\n";
+        cout << "O) Clear All Filters\n";
+        cout << "P) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -633,51 +667,37 @@ int filters_menu() {
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "E") {
             flip_image_menu();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "F") {
             rotate_image_menu();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "G") {
-            // Skew();
-            cout << "Operation completed successfully!" << endl;
+            Darken_and_Lighten_Image();
         } else if (filterschoice == "H") {
-            edit_brightness();
-        } else if (filterschoice == "I") {
-            // resize();
-            cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "J") {
             crop_image();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "K") {
+        } else if (filterschoice == "I") {
             blur();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "L") {
-            // pixlate();
-            cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "M") {
+        } else if (filterschoice == "J") {
             detect_image_edge();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "N") {
-            // frame();
-        } else if (filterschoice == "O") {
+        } else if (filterschoice == "K") {
             Wanno_Day();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "P") {
+        } else if (filterschoice == "L") {
             Wanno_Night();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "Q") {
+        } else if (filterschoice == "M") {
             Wanno_TV();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "R") {
+        } else if (filterschoice == "N") {
             infera_red();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "S") {
-            oil_paint();
-            cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "T") {
-            // bouns2();
-        } else if (filterschoice == "U") {
+        } else if (filterschoice == "O") {
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl;
-        } else if (filterschoice == "V") {
+        } else if (filterschoice == "P") {
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
