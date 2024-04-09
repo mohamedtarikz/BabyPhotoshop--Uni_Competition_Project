@@ -194,10 +194,10 @@ void invert_image() {
 }
 
 // Filter to detect image edges
-void detect_image_edge() {
+void detect_edge() {
     // Convert input image to black and white
     black_and_white();
-    Image Detected_edges(img_in.width, img_in.height);
+    Image img_Detected_edges(img_in.width, img_in.height);
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
@@ -209,26 +209,26 @@ void detect_image_edge() {
                         (img_in(i, j, k) == 0 && img_in(i, j - 1, k) == 255) ||
                         (img_in(i, j, k) == 0 && img_in(i, j + 1, k) == 255)) {
                         // If any of the neighboring pixels are white, set the corresponding pixel in Detected_edges to black
-                        Detected_edges(i, j, k) = 0;
+                        img_Detected_edges(i, j, k) = 0;
                     } else {
                         // If none of the neighboring pixels are white, set the corresponding pixel in Detected_edges to white
-                        Detected_edges(i, j, k) = 255;
+                        img_Detected_edges(i, j, k) = 255;
                     }
                 } else {
                     // If the pixel is on the image border, retain its original color in Detected_edges
-                    Detected_edges(i, j, k) = img_in(i, j, k);
+                    img_Detected_edges(i, j, k) = img_in(i, j, k);
                 }
             }
         }
     }
-    img_in = Detected_edges;
+    img_in = img_Detected_edges;
 }
 
 void blur() {
     // Declare variables
     int r, sum, sr, er, sc, ec, area;
     // Create a new image for the blurred result with the same dimensions as the input image
-    Image blur_img(img_in.width, img_in.height);
+    Image img_blured(img_in.width, img_in.height);
     // Prompt the user to enter the blur radius
     cout << "Enter the radius of the blur (the higher the stronger the effect is): ";
     cin >> r;
@@ -263,7 +263,7 @@ void blur() {
                     cmlt[j][i][k] = row[j][i][k]; // First row cumulative sum is same as row value
                 else if (!j) {
                     cmlt[j][i][k] += cmlt[j][i - 1][k]; // Add previous column value
-                }else {
+                } else {
                     cmlt[j][i][k] = cmlt[j][i - 1][k] + row[j][i][k]; // Add previous row and column value
                 }
             }
@@ -283,12 +283,12 @@ void blur() {
                 // Calculate average pixel value within the region
                 sum /= area;
                 // Set blurred pixel value in the output image
-                blur_img(i - 1, j - 1, k) = min(sum, 255); // Clamp to maximum pixel value (255)
+                img_blured(i - 1, j - 1, k) = min(sum, 255); // Clamp to maximum pixel value (255)
             }
         }
     }
     // Update the input image with the blurred image
-    img_in = blur_img;
+    img_in = img_blured;
 }
 
 // Function to merge the input image with another image
@@ -518,53 +518,52 @@ void infera_red() {
 
 void pixelate() {
     int r;
-    cout<<"Enter radius of pixelation(the more the stronger the effect) (0 - 10): ";
-    cin>>r;
+    cout << "Enter radius of pixelation(the more the stronger the effect) (0 - 10): ";
+    cin >> r;
     Image pixels(img_in.width, img_in.height);
-    for (int i = 0; i < img_in.width; i+=r) {
-        for (int j = 0; j < img_in.height; j+=r) {
+    for (int i = 0; i < img_in.width; i += r) {
+        for (int j = 0; j < img_in.height; j += r) {
             for (int k = 0; k < 3; k++) {
-                unsigned char x = img_in(i,j,k);
+                unsigned char x = img_in(i, j, k);
                 for (int l = 0; l < r; ++l) {
                     for (int m = 0; m < r; ++m) {
-                        x = max((int)x,(int)img_in(min(i+l,img_in.width-1),min(j+m,img_in.height-1),k));
+                        x = max((int)x, (int)img_in(min(i + l, img_in.width - 1), min(j + m, img_in.height - 1), k));
                     }
                 }
                 for (int l = 0; l < r; ++l) {
                     for (int m = 0; m < r; ++m) {
-                        pixels(min(i+l,img_in.width-1),min(j+m,img_in.height-1),k)=x;
+                        pixels(min(i + l, img_in.width - 1), min(j + m, img_in.height - 1), k) = x;
                     }
                 }
             }
         }
     }
-    pixels.saveImage("s.jpg");
+    img_in = pixels;
 }
 
 void oil_painted() {
-     Image oil_painted(img_in.width, img_in.height);
-     for (int i = 0; i < img_in.width; i++) {
-         for (int j = 0; j < img_in.height; j++) {
-             for (int k = 0; k < 3; k++) {
-                 unsigned char max_value = img_in(i, j, k);
-                 // Check right neighbor
-                 if (i < img_in.width - 1 && img_in(i + 1, j, k) > max_value) {
-                     max_value = img_in(i + 1, j, k);
-                 }
-
-                 // Check bottom neighbor
-                 if (j < img_in.height - 1 && img_in(i, j + 1, k) > max_value) {
-                     max_value = img_in(i, j + 1, k);
-                 }
-                 // Check bottom-right neighbor
-                 if (i < img_in.width - 1 && j < img_in.height - 1 && img_in(i + 1, j + 1, k) > max_value) {
-                     max_value = img_in(i + 1, j + 1, k);
-                 }
-                 oil_painted(i, j, k) = max_value;
-             }
-         }
-     }
-     oil_painted.saveImage("s.png");
+    Image oil_painted(img_in.width, img_in.height);
+    for (int i = 0; i < img_in.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                unsigned char max_value = img_in(i, j, k);
+                // Check right neighbor
+                if (i < img_in.width - 1 && img_in(i + 1, j, k) > max_value) {
+                    max_value = img_in(i + 1, j, k);
+                }
+                // Check bottom neighbor
+                if (j < img_in.height - 1 && img_in(i, j + 1, k) > max_value) {
+                    max_value = img_in(i, j + 1, k);
+                }
+                // Check bottom-right neighbor
+                if (i < img_in.width - 1 && j < img_in.height - 1 && img_in(i + 1, j + 1, k) > max_value) {
+                    max_value = img_in(i + 1, j + 1, k);
+                }
+                oil_painted(i, j, k) = max_value;
+            }
+        }
+    }
+    oil_painted.saveImage("s.png");
 }
 
 // Function to prompt the user to enter an image name with its extension and load the image
@@ -639,16 +638,22 @@ int filters_menu() {
         cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate\n";
-        cout << "G) Edit Brightness\n";
-        cout << "H) Crop\n";
-        cout << "I) Blur\n";
-        cout << "J) Detect image edges\n";
-        cout << "K) Wanno Day\n";
-        cout << "L) Wanno Night\n";
-        cout << "M) Wanno TV\n";
-        cout << "N) Infera red\n";
-        cout << "O) Clear All Filters\n";
-        cout << "P) Back to the Main menu\n";
+        cout << "G) - Skew\n";
+        cout << "H) Edit Brightness\n";
+        cout << "I) - Resize\n";
+        cout << "J) Crop\n";
+        cout << "K) Blur\n";
+        cout << "L) Pixlate\n";
+        cout << "M) Detect image edges\n";
+        cout << "N) - Frame\n";
+        cout << "O) Wanno Day\n";
+        cout << "P) Wanno Night\n";
+        cout << "Q) Wanno TV\n";
+        cout << "R) Infera red\n";
+        cout << "S) - Oil painting\n";
+        cout << "T) - Bouns 2\n";
+        cout << "U) Clear All Filters\n";
+        cout << "V) Back to the Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -667,37 +672,51 @@ int filters_menu() {
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "E") {
             flip_image_menu();
-            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "F") {
             rotate_image_menu();
-            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "G") {
-            Darken_and_Lighten_Image();
-        } else if (filterschoice == "H") {
-            crop_image();
+            // Skew();
             cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "H") {
+            edit_brightness();
         } else if (filterschoice == "I") {
-            blur();
+            // resize();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "J") {
-            detect_image_edge();
+            crop_image();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "K") {
-            Wanno_Day();
+            blur();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "L") {
-            Wanno_Night();
+            // pixlate();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "M") {
-            Wanno_TV();
+            detect_edge();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "N") {
+            // frame();
+        } else if (filterschoice == "O") {
+            Wanno_Day();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "P") {
+            Wanno_Night();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "Q") {
+            Wanno_TV();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "R") {
             infera_red();
             cout << "Operation completed successfully!" << endl;
-        } else if (filterschoice == "O") {
+        } else if (filterschoice == "S") {
+            oil_painted();
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "T") {
+            // bouns2();
+        } else if (filterschoice == "U") {
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl;
-        } else if (filterschoice == "P") {
+        } else if (filterschoice == "V") {
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
