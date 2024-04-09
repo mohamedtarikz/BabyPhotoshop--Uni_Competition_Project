@@ -87,7 +87,7 @@ void black_and_white() {
 void crop_image() {
     // Declare variables to store user input for coordinates and dimensions
     string X, Y, W, H;
-    int x,y,w,h;
+    int x, y, w, h;
     // Continue prompting for input until valid values are provided
     while (true) {
         // Prompt user to enter starting X coordinate
@@ -108,9 +108,9 @@ void crop_image() {
             continue;
         }
         // Convert input strings to integers
-        try{
+        try {
             x = stoi(X), y = stoi(Y), w = stoi(W), h = stoi(H);
-        } catch(out_of_range) {
+        } catch (out_of_range) {
             cout << "Coordinates are out of bounds." << endl;
         }
         // Check if the specified crop area is within the bounds of the image
