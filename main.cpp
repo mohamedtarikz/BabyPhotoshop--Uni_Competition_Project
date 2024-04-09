@@ -122,6 +122,8 @@ void crop_image() {
             break;
         }
     }
+    // Convert input strings to integers after validation
+    int x = stoi(X), y = stoi(Y), w = stoi(W), h = stoi(H);
     // Initialize variables for iterating through cropped image
     int M = 0, N = 0;
     // Create a new image to store the cropped region
@@ -227,59 +229,36 @@ void detect_edge() {
     img_in = img_Detected_edges;
 }
 
-// Filter to blur image
 void blur() {
     // Declare variables
-    string R;
     int r, sr, er, sc, ec;
     long long int sum, area;
     // Create a new image for the blurred result with the same dimensions as the input image
     Image blur_img(img_in.width, img_in.height);
     // Prompt the user to enter the blur radius
-    while (true) {
-        // Prompt user to enter starting X coordinate
-        cout << "Enter the strength of the blur (3 - 100): ";
-        cin >> R;
-        // Convert input strings to integers
-        // Check if any input is not numeric
-        if (!isNumeric(R)) {
-            cout << "Invalid input! Please enter positive integer values." << endl;
-            continue;
-        }
-        try {
-            r = stoi(R);
-        } catch (out_of_range) {
-            cout << "Invalid input! Please enter a number within the range." << endl;
-        }
-        if (r > 100 || r < 3) {
-            cout << "Invalid input! Please enter a number within the range." << endl;
-            continue;
-        } else {
-            // Break out of the loop if input is valid
-            break;
-        }
-    }
+    cout << "Enter the radius of the blur (the higher the stronger the effect is): ";
+    cin >> r;
     // Store the width and height of the input image
     int w = img_in.width;
     int h = img_in.height;
     // Initialize cumulative arrays for each color channel using dynamic memory allocation
-    long long int*** commulative_sum = new long long int** [w + 1];
-    long long int*** commulative_sum_rows = new long long int** [w + 1];
+    long long int*** cmlt = new long long int**[w + 1];
+    long long int*** row = new long long int**[w + 1];
     for (int i = 0; i <= w; ++i) {
-        commulative_sum[i] = new long long int* [h + 1];
-        commulative_sum_rows[i] = new long long int* [h + 1];
+        cmlt[i] = new long long int*[h + 1];
+        row[i] = new long long int*[h + 1];
         for (int j = 0; j <= h; ++j) {
-            commulative_sum[i][j] = new long long int[3];
-            commulative_sum_rows[i][j] = new long long int[3];
-            memset(commulative_sum[i][j], 0, sizeof(long long int) * 3); // Initialize cumulative arrays with zeros
-            memset(commulative_sum_rows[i][j], 0, sizeof(long long int) * 3);    // Initialize row arrays with zeros
+            cmlt[i][j] = new long long int[3];
+            row[i][j] = new long long int[3];
+            memset(cmlt[i][j], 0, sizeof(long long int) * 3); // Initialize cumulative arrays with zeros
+            memset(row[i][j], 0, sizeof(long long int) * 3);    // Initialize row arrays with zeros
         }
     }
     // Copy pixel values from input image to cumulative and row arrays
     for (int i = 1; i <= w; ++i) {
         for (int j = 1; j <= h; ++j) {
             for (int k = 0; k < 3; ++k) {
-                commulative_sum[i][j][k] = commulative_sum_rows[i][j][k] = img_in(i - 1, j - 1, k); // Copy pixel values
+                cmlt[i][j][k] = row[i][j][k] = img_in(i - 1, j - 1, k); // Copy pixel values
             }
         }
     }
@@ -287,7 +266,7 @@ void blur() {
     for (int i = 1; i <= w; i++) {
         for (int j = 1; j <= h; j++) {
             for (int k = 0; k < 3; k++) {
-                commulative_sum_rows[i][j][k] += commulative_sum_rows[i - 1][j][k]; // Add previous pixel value in row
+                row[i][j][k] += row[i - 1][j][k]; // Add previous pixel value in row
             }
         }
     }
@@ -296,11 +275,12 @@ void blur() {
         for (int j = 1; j <= w; j++) {
             for (int k = 0; k < 3; k++) {
                 if (!i)
-                    commulative_sum[j][i][k] = commulative_sum_rows[j][i][k]; // First row cumulative sum is same as row value
+                    cmlt[j][i][k] = row[j][i][k]; // First row cumulative sum is same as row value
                 else if (!j) {
-                    commulative_sum[j][i][k] += commulative_sum[j][i - 1][k]; // Add previous column value
-                } else {
-                    commulative_sum[j][i][k] = commulative_sum[j][i - 1][k] + commulative_sum_rows[j][i][k]; // Add previous row and column value
+                    cmlt[j][i][k] += cmlt[j][i - 1][k]; // Add previous column value
+                }
+                else {
+                    cmlt[j][i][k] = cmlt[j][i - 1][k] + row[j][i][k]; // Add previous row and column value
                 }
             }
         }
@@ -314,7 +294,7 @@ void blur() {
                 sr = max(j - r, 1); er = min(j + r, h);
                 area = ((er - sr) * (ec - sc));
                 // Calculate sum of pixel values within the region
-                sum = commulative_sum[ec][er][k] - commulative_sum[ec][sr - 1][k] - commulative_sum[sc - 1][er][k] + commulative_sum[sc - 1][sr - 1][k];
+                sum = cmlt[ec][er][k] - cmlt[ec][sr - 1][k] - cmlt[sc - 1][er][k] + cmlt[sc - 1][sr - 1][k];
                 // Calculate average pixel value within the region
                 sum /= area;
                 // Set blurred pixel value in the output image
@@ -324,17 +304,18 @@ void blur() {
     }
     // Update the input image with the blurred image
     img_in = blur_img;
+
     // Deallocate memory
     for (int i = 0; i <= w; ++i) {
         for (int j = 0; j <= h; ++j) {
-            delete[] commulative_sum[i][j];
-            delete[] commulative_sum_rows[i][j];
+            delete[] cmlt[i][j];
+            delete[] row[i][j];
         }
-        delete[] commulative_sum[i];
-        delete[] commulative_sum_rows[i];
+        delete[] cmlt[i];
+        delete[] row[i];
     }
-    delete[] commulative_sum;
-    delete[] commulative_sum_rows;
+    delete[] cmlt;
+    delete[] row;
 }
 
 // Function to merge the input image with another image
@@ -452,7 +433,7 @@ void rotate_image_90deg() {
 }
 
 // This function provides options to rotate the image based on user input.
-int rotate_image_menu() {
+void rotate_image_menu() {
     string flipchoice; // Variable to store user's choice
     while (true) { // Infinite loop to repeatedly prompt the user until a valid choice is made
         // Display menu options
@@ -472,21 +453,18 @@ int rotate_image_menu() {
             flip_vertically();
             rotate_image_90deg();
             cout << "Operation completed successfully!" << endl;
-            return 0;
         } else if (flipchoice == "B") {
             // Rotate the image 180 degrees
             flip_horizontally();
             flip_vertically();
             cout << "Operation completed successfully!" << endl;
-            return 0;
         } else if (flipchoice == "C") {
             // Rotate the image 270 degrees clockwise
             flip_horizontally();
             rotate_image_90deg();
             cout << "Operation completed successfully!" << endl;
-            return 0;
         } else if (flipchoice == "D") {
-            return 0;
+            return;
         } else {
             cout << "Please enter a valid choice" << endl;
         }
@@ -588,28 +566,16 @@ void pixelate() {
 }
 
 void oil_painted() {
-    Image oil_painted(img_in.width, img_in.height);
+    Image oil_painted(img_in);
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
-                unsigned char max_value = img_in(i, j, k);
-                // Check right neighbor
-                if (i < img_in.width - 1 && img_in(i + 1, j, k) > max_value) {
-                    max_value = img_in(i + 1, j, k);
-                }
-                // Check bottom neighbor
-                if (j < img_in.height - 1 && img_in(i, j + 1, k) > max_value) {
-                    max_value = img_in(i, j + 1, k);
-                }
-                // Check bottom-right neighbor
-                if (i < img_in.width - 1 && j < img_in.height - 1 && img_in(i + 1, j + 1, k) > max_value) {
-                    max_value = img_in(i + 1, j + 1, k);
-                }
-                oil_painted(i, j, k) = max_value;
+                oil_painted(i,j,k)/=40;
+                oil_painted(i,j,k)*=40;
             }
         }
     }
-    oil_painted.saveImage("s.png");
+    img_in = oil_painted;
 }
 
 // Function to prompt the user to enter an image name with its extension and load the image
@@ -696,7 +662,7 @@ int filters_menu() {
         cout << "P) Wanno Night\n";
         cout << "Q) Wanno TV\n";
         cout << "R) Infera red\n";
-        cout << "S) - Oil painting\n";
+        cout << "S) Oil painting\n";
         cout << "T) - Bouns 2\n";
         cout << "U) Clear All Filters\n";
         cout << "V) Back to the Main menu\n";
