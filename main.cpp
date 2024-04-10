@@ -122,8 +122,6 @@ void crop_image() {
             break;
         }
     }
-    // Convert input strings to integers after validation
-    int x = stoi(X), y = stoi(Y), w = stoi(W), h = stoi(H);
     // Initialize variables for iterating through cropped image
     int M = 0, N = 0;
     // Create a new image to store the cropped region
@@ -231,22 +229,44 @@ void detect_edge() {
 
 void blur() {
     // Declare variables
+    string R;
     int r, sr, er, sc, ec;
     long long int sum, area;
     // Create a new image for the blurred result with the same dimensions as the input image
     Image blur_img(img_in.width, img_in.height);
     // Prompt the user to enter the blur radius
-    cout << "Enter the radius of the blur (the higher the stronger the effect is): ";
-    cin >> r;
+    while (true) {
+        // Prompt user to enter starting X coordinate
+        cout << "Enter the strength of the blur (3 - 100): ";
+        cin >> R;
+        // Convert input strings to integers
+        // Check if any input is not numeric
+        if (!isNumeric(R)) {
+            cout << "Invalid input! Please enter positive integer values." << endl;
+            continue;
+        }
+        try {
+            r = stoi(R);
+        } catch (out_of_range) {
+            cout << "Invalid input! Please enter a number within the range." << endl;
+        }
+        if (r > 100 || r < 3) {
+            cout << "Invalid input! Please enter a number within the range." << endl;
+            continue;
+        } else {
+            // Break out of the loop if input is valid
+            break;
+        }
+    }
     // Store the width and height of the input image
     int w = img_in.width;
     int h = img_in.height;
     // Initialize cumulative arrays for each color channel using dynamic memory allocation
-    long long int*** cmlt = new long long int**[w + 1];
-    long long int*** row = new long long int**[w + 1];
+    long long int*** cmlt = new long long int** [w + 1];
+    long long int*** row = new long long int** [w + 1];
     for (int i = 0; i <= w; ++i) {
-        cmlt[i] = new long long int*[h + 1];
-        row[i] = new long long int*[h + 1];
+        cmlt[i] = new long long int* [h + 1];
+        row[i] = new long long int* [h + 1];
         for (int j = 0; j <= h; ++j) {
             cmlt[i][j] = new long long int[3];
             row[i][j] = new long long int[3];
@@ -278,8 +298,7 @@ void blur() {
                     cmlt[j][i][k] = row[j][i][k]; // First row cumulative sum is same as row value
                 else if (!j) {
                     cmlt[j][i][k] += cmlt[j][i - 1][k]; // Add previous column value
-                }
-                else {
+                } else {
                     cmlt[j][i][k] = cmlt[j][i - 1][k] + row[j][i][k]; // Add previous row and column value
                 }
             }
@@ -304,7 +323,6 @@ void blur() {
     }
     // Update the input image with the blurred image
     img_in = blur_img;
-
     // Deallocate memory
     for (int i = 0; i <= w; ++i) {
         for (int j = 0; j <= h; ++j) {
@@ -566,16 +584,102 @@ void pixelate() {
 }
 
 void oil_painted() {
-    Image oil_painted(img_in);
+    Image oil_painted(img_in.width, img_in.height);
     for (int i = 0; i < img_in.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
-                oil_painted(i,j,k)/=40;
-                oil_painted(i,j,k)*=40;
+                oil_painted(i, j, k) /= 40;
+                oil_painted(i, j, k) *= 40;
             }
         }
     }
     img_in = oil_painted;
+}
+
+void normframe() {
+    int x, r, g, b;
+    cout << "Enter frame thickness: ";
+    cin >> x;
+    cout << "Enter the desired RGB values (\"Rval Gval Bval\"): ";
+    cin >> r >> g >> b;
+    Image framed(img_in.width + 2 * x, img_in.height + 2 * x);
+    for (int i = 0; i < framed.width; i++) {
+        for (int j = 0; j < framed.height; j++) {
+            framed(i, j, 0) = r;
+            framed(i, j, 1) = g;
+            framed(i, j, 2) = b;
+        }
+    }
+    for (int i = x; i < x + img_in.width; i++) {
+        for (int j = x; j < x + img_in.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                framed(i, j, k) = img_in(i - x, j - x, k);
+            }
+        }
+    }
+    framed.saveImage("framed.png");
+    img_in = framed;
+}
+
+void fanframe() {
+    int x, r1, g1, b1, r2, g2, b2;
+    cout << "Enter frame Thickness: ";
+    cin >> x;
+    cout << "Enter first desired RGB values (\"Rval Gval Bval\"): ";
+    cin >> r1 >> g1 >> b1;
+    cout << "Enter second desired RGB values (\"Rval Gval Bval\"): ";
+    cin >> r2 >> g2 >> b2;
+    Image framed(img_in.width + 2 * x, img_in.height + 2 * x);
+    int y = x / 2;
+    for (int i = 0; i < framed.width; i++) {
+        for (int j = 0; j < framed.height; j++) {
+            framed(i, j, 0) = r1;
+            framed(i, j, 1) = g1;
+            framed(i, j, 2) = b1;
+        }
+    }
+    for (int i = y; i < framed.width - y; i++) {
+        for (int j = y; j < framed.height - y; j++) {
+            framed(i, j, 0) = r2;
+            framed(i, j, 1) = g2;
+            framed(i, j, 2) = b2;
+        }
+    }
+    for (int i = x; i < x + img_in.width; i++) {
+        for (int j = x; j < x + img_in.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                framed(i, j, k) = img_in(i - x, j - x, k);
+            }
+        }
+    }
+    img_in = framed;
+}
+
+int frame() {
+    string framechoice;
+    while (true) {
+        cout << "\n*** How do you want to save your image? ***\n";
+        cout << "===========================================\n";
+        cout << "A) Normal Frame\n";
+        cout << "B) Fancy Frame\n";
+        cout << "C) Back to the Main menu\n";
+        cout << "===========================================\n";
+        cout << "Enter your choice: ";
+        cin >> framechoice;
+        transform(framechoice.begin(), framechoice.end(), framechoice.begin(), ::toupper);
+        // Process user's save choice
+        if (framechoice == "A") {
+            normframe();
+            return 0;
+        } else if (framechoice == "B") {
+            fanframe();
+            return 0;
+        } else if (framechoice == "C") {
+            return 0;
+        } else {
+            cout << "Please enter a valid choice" << endl;
+        }
+    }
 }
 
 // Function to prompt the user to enter an image name with its extension and load the image
@@ -638,6 +742,56 @@ int save(Image img_save) {
     }
 }
 
+void Skew() {
+    double angle;
+    string ang;
+    while (true) {
+        cout << "please enter the angle: ";
+        cin >> ang;
+        if (!isNumeric(ang)) {
+            cout << "Please enter a proper positive numeric value." << endl;
+            continue;
+        }
+        try {
+            angle = stod(ang);
+        } catch (out_of_range) {
+            cout << "Please enter a proper value" << endl;
+            continue;
+        }
+        if (((int)angle%90) == 0) {
+            cout  << "Invalid Angle. 90 and it's multiples isn't allowed!"<<endl;
+            continue;
+        }
+        if (angle > 5000) {
+            cout << "Please enter a proper value" << endl;
+            continue;
+        }
+        else {
+            break;
+        }
+    }
+    int w = ceil((img_in.height) * tan(angle * M_PI / 180.0));
+    Image img_skewed(img_in.width + w, img_in.height);
+    for (int i = 0; i < img_skewed.width; i++) {
+        for (int j = 0; j < img_skewed.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                img_skewed(i, j, k) = 255;
+            }
+        }
+    }
+    int c = 0;
+    for (int i = w; i < img_skewed.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                img_skewed(i - c, j, k) = img_in(i - w, j, k);
+            }
+            c = ceil(j * tan(angle * M_PI / 180.0));
+        }
+        c = 0;
+    }
+    img_in = img_skewed;
+}
+
 // Function to display the filters menu and apply selected filters
 int filters_menu() {
     string filterschoice;
@@ -650,14 +804,14 @@ int filters_menu() {
         cout << "D) Merge\n";
         cout << "E) Flip\n";
         cout << "F) Rotate\n";
-        cout << "G) - Skew\n";
+        cout << "G) Skew\n";
         cout << "H) Edit Brightness\n";
         cout << "I) - Resize\n";
         cout << "J) Crop\n";
         cout << "K) Blur\n";
         cout << "L) Pixlate\n";
         cout << "M) Detect image edges\n";
-        cout << "N) - Frame\n";
+        cout << "N) Frame\n";
         cout << "O) Wanno Day\n";
         cout << "P) Wanno Night\n";
         cout << "Q) Wanno TV\n";
@@ -687,7 +841,7 @@ int filters_menu() {
         } else if (filterschoice == "F") {
             rotate_image_menu();
         } else if (filterschoice == "G") {
-            // Skew();
+            Skew();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "H") {
             edit_brightness();
@@ -707,7 +861,8 @@ int filters_menu() {
             detect_edge();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "N") {
-            // frame();
+            frame();
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "O") {
             Wanno_Day();
             cout << "Operation completed successfully!" << endl;
