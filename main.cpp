@@ -202,19 +202,20 @@ void resize(){
     cout<<"Enter the new desired dimensions (\"Width Height\"): ";
     cin>>nw>>nh;
     int x,y;
-    x = w/nw;
+    x = max(w,nw)/min(nw,w);
     y = x + 1;
-    int a = y * nw - w;
-    int b = (w - x * a) / y;
+    int a = y * min(nw,w) - max(w,nw);
+    int b = (max(w,nw) - x * a) / y;
     int n = a * x;
     int m = b * y;
-    Image res(a,g);
-    Image bas(b,g);
     Image all(nw,g);
     if(nw<=w){
+        Image res(a,g);
+        Image bas(b,g);
         int idx, fix, avg;
         for (int j = 0; j < g; j++) {
             idx = 0;
+            fix = m;
             for(int h = 0; h < a; h++) {
                 for (int k = 0; k < 3; ++k) {
                     avg = 0;
@@ -257,8 +258,28 @@ void resize(){
                 }
             }
         }
-        res.saveImage("try.jpg");
-        bas.saveImage("tr.jpg");
+    }
+    else{
+        int idx;
+        for (int j = 0; j < g; j++) {
+            idx = 0;
+            for(int i = 0; i < w; i++){
+                if(i>=a){
+                    for(int h = 0; h < x; h++){
+                        for (int k = 0; k < 3; ++k) {
+                             all(i+h,j,k) = img_in(i,j,k);
+                        }
+                    }
+                }
+                else{
+                    for(int h = 0; h < y; h++){
+                        for (int k = 0; k < 3; ++k) {
+                            all(i+h,j,k) = img_in(i,j,k);
+                        }
+                    }
+                }
+            }
+        }
         all.saveImage("all.jpg");
     }
 }
