@@ -246,7 +246,7 @@ void resize(){
                             break;
                         }
                     }
-                    avg/=x;
+                    avg/=y;
                     bas(h,j,k) = min(avg,255);
                 }
                 fix+=y;
