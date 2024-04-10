@@ -282,6 +282,88 @@ void resize(){
         }
     }
     img_in = Resized;
+    width = img_in.width;
+    height = img_in.height;
+    scale1 = max(height, newHeight) / min(newHeight, height);
+    scale2 = scale1 + 1;
+    FirstPart = scale2 * min(newHeight, height) - max(height, newHeight);
+    SecondPart = (max(height, newHeight) - scale1 * FirstPart) / scale2;
+    StartofSecondpart = SecondPart * scale2;
+    Image Resizedall(width, newHeight);
+    if(newHeight <= height){
+        Image FirstImage(width, FirstPart);
+        Image SecondImage(width, SecondPart);
+        int idx, fixed, avrg;
+        for (int j = 0; j < width; j++) {
+            idx = 0;
+            fixed = StartofSecondpart;
+            for(int h = 0; h < FirstPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+                    for (int i = 0; i < scale1; i++) {
+                        avrg += img_in(j, idx, k);
+                        idx++;
+                        if(idx >= height) {
+                            break;
+                        }
+                    }
+                    avrg/=scale1;
+                    FirstImage(j, h, k) = min(avrg, 255);
+                }
+                fixed+=scale1;
+            }
+            idx = 0;
+            fixed = 0;
+            for(int h = 0; h < SecondPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+                    for (int i = 0; i < scale2; i++) {
+                        avrg += img_in(j, idx, k);
+                        idx++;
+                        if(idx >= height) {
+                            break;
+                        }
+                    }
+                    avrg/=scale2;
+                    SecondImage(j, h, k) = min(avrg, 255);
+                }
+                fixed+=scale2;
+            }
+        }
+        for(int j = 0; j < Resizedall.width; ++j){
+            for (int i=0; i < Resizedall.height; i++) {
+                for (int k = 0; k < 3; ++k) {
+                    Resizedall(j, i, k) = (i >= SecondPart ? FirstImage(j, i - SecondPart, k) : SecondImage(j, i, k));
+                }
+            }
+        }
+    }
+    else{
+        int idx;
+        for (int j = 0; j < width; j++) {
+            idx = 0;
+            for (int i = 0; i < height; i++) {
+                if (i >= FirstPart) {
+                    for (int h = 0; h < scale2; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resizedall(j, idx, k) = img_in(j, i, k);
+                        }
+                        idx++;
+                    }
+                } else {
+                    for (int h = 0; h < scale1; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resizedall(j, idx, k) = img_in(j, i, k);
+                        }
+                        idx++;
+                    }
+                }
+            }
+        }
+    }
+    img_in = Resizedall;
 }
 
 // Filter to detect image edges
