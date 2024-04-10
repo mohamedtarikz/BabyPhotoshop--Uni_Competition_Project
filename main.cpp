@@ -196,6 +196,94 @@ void invert_image() {
     }
 }
 
+void resize(){
+    int nw,nh;
+    int w = img_in.width, g = img_in.height;
+    cout<<"Enter the new desired dimensions (\"Width Height\"): ";
+    cin>>nw>>nh;
+    int x,y;
+    x = max(w,nw)/min(nw,w);
+    y = x + 1;
+    int a = y * min(nw,w) - max(w,nw);
+    int b = (max(w,nw) - x * a) / y;
+    int n = a * x;
+    int m = b * y;
+    Image all(nw,g);
+    if(nw<=w){
+        Image res(a,g);
+        Image bas(b,g);
+        int idx, fix, avg;
+        for (int j = 0; j < g; j++) {
+            idx = 0;
+            fix = m;
+            for(int h = 0; h < a; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avg = 0;
+                    idx = fix;
+                    for (int i = 0; i < x; i++) {
+                        avg += img_in(idx,j,k);
+                        idx++;
+                        if(idx >= w) {
+                            break;
+                        }
+                    }
+                    avg/=x;
+                    res(h,j,k) = min(avg,255);
+                }
+                fix+=x;
+            }
+            idx = 0;
+            fix = 0;
+            for(int h = 0; h < b; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avg = 0;
+                    idx = fix;
+                    for (int i = 0; i < y; i++) {
+                        avg += img_in(idx,j,k);
+                        idx++;
+                        if(idx >= w) {
+                            break;
+                        }
+                    }
+                    avg/=y;
+                    bas(h,j,k) = min(avg,255);
+                }
+                fix+=y;
+            }
+        }
+        for(int i=0;i<all.height;i++){
+            for (int j = 0; j < all.width; ++j) {
+                for (int k = 0; k < 3; ++k) {
+                    all(j,i,k) = (j>=b? res(j-b,i,k):bas(j,i,k));
+                }
+            }
+        }
+    }
+    else{
+        int idx;
+        for (int j = 0; j < g; j++) {
+            idx = 0;
+            for(int i = 0; i < w; i++){
+                if(i>=a){
+                    for(int h = 0; h < x; h++){
+                        for (int k = 0; k < 3; ++k) {
+                             all(i+h,j,k) = img_in(i,j,k);
+                        }
+                    }
+                }
+                else{
+                    for(int h = 0; h < y; h++){
+                        for (int k = 0; k < 3; ++k) {
+                            all(i+h,j,k) = img_in(i,j,k);
+                        }
+                    }
+                }
+            }
+        }
+        all.saveImage("all.jpg");
+    }
+}
+
 // Filter to detect image edges
 void detect_edge() {
     // Convert input image to black and white
@@ -559,24 +647,19 @@ void infera_red() {
 }
 
 void pixelate() {
-    // Prompt user for pixelation radius
     int r;
-    cout << "Enter radius of pixelation (the more the stronger the effect) (0 - 10): ";
+    cout << "Enter radius of pixelation(the more the stronger the effect) (0 - 10): ";
     cin >> r;
-    // Create a new image to store the pixelated result
     Image pixels(img_in.width, img_in.height);
-    // Iterate through the image pixels with step size of r
     for (int i = 0; i < img_in.width; i += r) {
         for (int j = 0; j < img_in.height; j += r) {
             for (int k = 0; k < 3; k++) {
                 unsigned char x = img_in(i, j, k);
-                // Find the maximum color value within the pixel block
                 for (int l = 0; l < r; ++l) {
                     for (int m = 0; m < r; ++m) {
                         x = max((int)x, (int)img_in(min(i + l, img_in.width - 1), min(j + m, img_in.height - 1), k));
                     }
                 }
-                // Set the pixel block to the maximum color value
                 for (int l = 0; l < r; ++l) {
                     for (int m = 0; m < r; ++m) {
                         pixels(min(i + l, img_in.width - 1), min(j + m, img_in.height - 1), k) = x;
@@ -585,39 +668,29 @@ void pixelate() {
             }
         }
     }
-    // Update the input image with the pixelated result
     img_in = pixels;
 }
 
 void oil_painted() {
-    // Create a copy of the input image to store the oil-painted effect
-    Image img_oil_paint(img_in);
-    // Reduce the color precision of each pixel
-    for (int i = 0; i < img_oil_paint.width; i++) {
-        for (int j = 0; j < img_oil_paint.height; j++) {
+    Image oil_painted(img_in.width, img_in.height);
+    for (int i = 0; i < img_in.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
-                // Divide the color value of each channel by 40 to reduce precision
-                img_oil_paint(i, j, k) /= 40;
-                // Multiply the result by 40 to bring it closer to its original value
-                img_oil_paint(i, j, k) *= 40;
+                oil_painted(i, j, k) /= 40;
+                oil_painted(i, j, k) *= 40;
             }
         }
     }
-    // Update the input image with the oil-painted result
-    img_in = img_oil_paint;
+    img_in = oil_painted;
 }
 
-
 void normframe() {
-    // Prompt user for frame thickness and desired RGB values
     int x, r, g, b;
     cout << "Enter frame thickness: ";
     cin >> x;
     cout << "Enter the desired RGB values (\"Rval Gval Bval\"): ";
     cin >> r >> g >> b;
-    // Create a new image for the framed result
     Image framed(img_in.width + 2 * x, img_in.height + 2 * x);
-    // Fill the frame area with the desired RGB values
     for (int i = 0; i < framed.width; i++) {
         for (int j = 0; j < framed.height; j++) {
             framed(i, j, 0) = r;
@@ -625,7 +698,6 @@ void normframe() {
             framed(i, j, 2) = b;
         }
     }
-    // Copy the original image into the frame area
     for (int i = x; i < x + img_in.width; i++) {
         for (int j = x; j < x + img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
@@ -633,13 +705,11 @@ void normframe() {
             }
         }
     }
-    // Save the framed image and update the input image
     framed.saveImage("framed.png");
     img_in = framed;
 }
 
 void fanframe() {
-    // Prompt user for frame thickness and desired RGB values for both frames
     int x, r1, g1, b1, r2, g2, b2;
     cout << "Enter frame Thickness: ";
     cin >> x;
@@ -647,10 +717,8 @@ void fanframe() {
     cin >> r1 >> g1 >> b1;
     cout << "Enter second desired RGB values (\"Rval Gval Bval\"): ";
     cin >> r2 >> g2 >> b2;
-    // Create a new image for the framed result
     Image framed(img_in.width + 2 * x, img_in.height + 2 * x);
     int y = x / 2;
-    // Fill the outer frame with the first set of RGB values
     for (int i = 0; i < framed.width; i++) {
         for (int j = 0; j < framed.height; j++) {
             framed(i, j, 0) = r1;
@@ -658,7 +726,6 @@ void fanframe() {
             framed(i, j, 2) = b1;
         }
     }
-    // Fill the inner frame with the second set of RGB values
     for (int i = y; i < framed.width - y; i++) {
         for (int j = y; j < framed.height - y; j++) {
             framed(i, j, 0) = r2;
@@ -666,7 +733,6 @@ void fanframe() {
             framed(i, j, 2) = b2;
         }
     }
-    // Copy the original image into the frame area
     for (int i = x; i < x + img_in.width; i++) {
         for (int j = x; j < x + img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
@@ -674,12 +740,10 @@ void fanframe() {
             }
         }
     }
-    // Update the input image with the framed result
     img_in = framed;
 }
 
 int frame() {
-    // Prompt user for frame choice until a valid choice is made
     string framechoice;
     while (true) {
         cout << "\n*** How do you want to save your image? ***\n";
@@ -691,7 +755,7 @@ int frame() {
         cout << "Enter your choice: ";
         cin >> framechoice;
         transform(framechoice.begin(), framechoice.end(), framechoice.begin(), ::toupper);
-        // Process user's frame choice
+        // Process user's save choice
         if (framechoice == "A") {
             normframe();
             return 0;
@@ -707,11 +771,10 @@ int frame() {
 }
 
 void Skew() {
-    // Prompt user for skew angle until a valid angle is entered
     double angle;
     string ang;
     while (true) {
-        cout << "Please enter the angle: ";
+        cout << "please enter the angle: ";
         cin >> ang;
         if (!isNumeric(ang)) {
             cout << "Please enter a proper positive numeric value." << endl;
@@ -723,22 +786,20 @@ void Skew() {
             cout << "Please enter a proper value" << endl;
             continue;
         }
-        if (((int)angle % 90) == 0) {
-            cout << "Invalid Angle. 90 and its multiples aren't allowed!" << endl;
+        if (((int)angle%90) == 0) {
+            cout  << "Invalid Angle. 90 and it's multiples isn't allowed!"<<endl;
             continue;
         }
         if (angle > 5000) {
             cout << "Please enter a proper value" << endl;
             continue;
-        } else {
+        }
+        else {
             break;
         }
     }
-    // Calculate the width expansion due to skewing
     int w = ceil((img_in.height) * tan(angle * M_PI / 180.0));
-    // Create a new image for the skewed result
     Image img_skewed(img_in.width + w, img_in.height);
-    // Fill the new image with white color
     for (int i = 0; i < img_skewed.width; i++) {
         for (int j = 0; j < img_skewed.height; j++) {
             for (int k = 0; k < 3; k++) {
@@ -746,20 +807,16 @@ void Skew() {
             }
         }
     }
-    // Skew the original image and copy it to the new image
     int c = 0;
-    for (int i = w; i < img_skewed.width; i++) { // Iterate through the columns of the skewed image, starting from the width expansion due to skewing (w)
+    for (int i = w; i < img_skewed.width; i++) {
         for (int j = 0; j < img_in.height; j++) {
             for (int k = 0; k < 3; k++) {
-                // Copy the pixel value from the original image to the skewed image, applying the horizontal offset (c) to the column index (i)
                 img_skewed(i - c, j, k) = img_in(i - w, j, k);
             }
-            // Calculate the horizontal offset (c) for each row in the skewed image based on the skew angle and current row index (j)
             c = ceil(j * tan(angle * M_PI / 180.0));
         }
         c = 0;
     }
-    // Update the input image with the skewed result
     img_in = img_skewed;
 }
 
@@ -823,6 +880,56 @@ int save(Image img_save) {
     }
 }
 
+void Skew() {
+    double angle;
+    string ang;
+    while (true) {
+        cout << "please enter the angle: ";
+        cin >> ang;
+        if (!isNumeric(ang)) {
+            cout << "Please enter a proper positive numeric value." << endl;
+            continue;
+        }
+        try {
+            angle = stod(ang);
+        } catch (out_of_range) {
+            cout << "Please enter a proper value" << endl;
+            continue;
+        }
+        if (((int)angle%90) == 0) {
+            cout  << "Invalid Angle. 90 and it's multiples isn't allowed!"<<endl;
+            continue;
+        }
+        if (angle > 5000) {
+            cout << "Please enter a proper value" << endl;
+            continue;
+        }
+        else {
+            break;
+        }
+    }
+    int w = ceil((img_in.height) * tan(angle * M_PI / 180.0));
+    Image img_skewed(img_in.width + w, img_in.height);
+    for (int i = 0; i < img_skewed.width; i++) {
+        for (int j = 0; j < img_skewed.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                img_skewed(i, j, k) = 255;
+            }
+        }
+    }
+    int c = 0;
+    for (int i = w; i < img_skewed.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                img_skewed(i - c, j, k) = img_in(i - w, j, k);
+            }
+            c = ceil(j * tan(angle * M_PI / 180.0));
+        }
+        c = 0;
+    }
+    img_in = img_skewed;
+}
+
 // Function to display the filters menu and apply selected filters
 int filters_menu() {
     string filterschoice;
@@ -877,7 +984,7 @@ int filters_menu() {
         } else if (filterschoice == "H") {
             edit_brightness();
         } else if (filterschoice == "I") {
-            // resize();
+            resize();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "J") {
             crop_image();
