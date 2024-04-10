@@ -197,84 +197,83 @@ void invert_image() {
 }
 
 void resize(){
-    int nw,nh;
-    int w = img_in.width, g = img_in.height;
+    int newWidth,newHeight;
+    int width = img_in.width, height = img_in.height;
     cout<<"Enter the new desired dimensions (\"Width Height\"): ";
-    cin>>nw>>nh;
-    int x,y;
-    x = max(w,nw)/min(nw,w);
-    y = x + 1;
-    int a = y * min(nw,w) - max(w,nw);
-    int b = (max(w,nw) - x * a) / y;
-    int n = a * x;
-    int m = b * y;
-    Image all(nw,g);
-    if(nw<=w){
-        Image res(a,g);
-        Image bas(b,g);
-        int idx, fix, avg;
-        for (int j = 0; j < g; j++) {
+    cin >> newWidth >> newHeight;
+    int scale1,scale2;
+    scale1 = max(width, newWidth) / min(newWidth, width);
+    scale2 = scale1 + 1;
+    int FirstPart = scale2 * min(newWidth, width) - max(width, newWidth);
+    int SecondPart = (max(width, newWidth) - scale1 * FirstPart) / scale2;
+    int StartofSecondpart = SecondPart * scale2;
+    Image Resized(newWidth, height);
+    if(newWidth <= width){
+        Image FirstImage(FirstPart, height);
+        Image SecondImage(SecondPart, height);
+        int idx, fixed, avrg;
+        for (int j = 0; j < height; j++) {
             idx = 0;
-            fix = m;
-            for(int h = 0; h < a; h++) {
+            fixed = StartofSecondpart;
+            for(int h = 0; h < FirstPart; h++) {
                 for (int k = 0; k < 3; ++k) {
-                    avg = 0;
-                    idx = fix;
-                    for (int i = 0; i < x; i++) {
-                        avg += img_in(idx,j,k);
+                    avrg = 0;
+                    idx = fixed;
+                    for (int i = 0; i < scale1; i++) {
+                        avrg += img_in(idx, j, k);
                         idx++;
-                        if(idx >= w) {
+                        if(idx >= width) {
                             break;
                         }
                     }
-                    avg/=x;
-                    res(h,j,k) = min(avg,255);
+                    avrg/=scale1;
+                    FirstImage(h, j, k) = min(avrg, 255);
                 }
-                fix+=x;
+                fixed+=scale1;
             }
             idx = 0;
-            fix = 0;
-            for(int h = 0; h < b; h++) {
+            fixed = 0;
+            for(int h = 0; h < SecondPart; h++) {
                 for (int k = 0; k < 3; ++k) {
-                    avg = 0;
-                    idx = fix;
-                    for (int i = 0; i < y; i++) {
-                        avg += img_in(idx,j,k);
+                    avrg = 0;
+                    idx = fixed;
+                    for (int i = 0; i < scale2; i++) {
+                        avrg += img_in(idx, j, k);
                         idx++;
-                        if(idx >= w) {
+                        if(idx >= width) {
                             break;
                         }
                     }
-                    avg/=y;
-                    bas(h,j,k) = min(avg,255);
+                    avrg/=scale2;
+                    SecondImage(h, j, k) = min(avrg, 255);
                 }
-                fix+=y;
+                fixed+=scale2;
             }
         }
-        for(int i=0;i<all.height;i++){
-            for (int j = 0; j < all.width; ++j) {
+        for(int i=0; i < Resized.height; i++){
+            for (int j = 0; j < Resized.width; ++j) {
                 for (int k = 0; k < 3; ++k) {
-                    all(j,i,k) = (j>=b? res(j-b,i,k):bas(j,i,k));
+                    Resized(j, i, k) = (j >= SecondPart ? FirstImage(j - SecondPart, i, k) : SecondImage(j, i, k));
                 }
             }
         }
     }
     else{
         int idx;
-        for (int j = 0; j < g; j++) {
+        for (int j = 0; j < height; j++) {
             idx = 0;
-            for (int i = 0; i < w; i++) {
-                if (i >= a) {
-                    for (int h = 0; h < y; h++) {
+            for (int i = 0; i < width; i++) {
+                if (i >= FirstPart) {
+                    for (int h = 0; h < scale2; h++) {
                         for (int k = 0; k < 3; ++k) {
-                            all(idx, j, k) = img_in(i, j, k);
+                            Resized(idx, j, k) = img_in(i, j, k);
                         }
                         idx++;
                     }
                 } else {
-                    for (int h = 0; h < x; h++) {
+                    for (int h = 0; h < scale1; h++) {
                         for (int k = 0; k < 3; ++k) {
-                            all(idx, j, k) = img_in(i, j, k);
+                            Resized(idx, j, k) = img_in(i, j, k);
                         }
                         idx++;
                     }
@@ -282,7 +281,7 @@ void resize(){
             }
         }
     }
-    img_in = all;
+    img_in = Resized;
 }
 
 // Filter to detect image edges
