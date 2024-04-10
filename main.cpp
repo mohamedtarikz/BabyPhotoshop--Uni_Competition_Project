@@ -212,7 +212,6 @@ void resize(){
     Image bas(b,g);
     Image all(nw,g);
     if(nw<=w){
-        cout<<a<<" "<<b<<" "<<n<<" "<<m<<endl;
         int idx, fix, avg;
         for (int j = 0; j < g; j++) {
             idx = 0;
@@ -232,7 +231,6 @@ void resize(){
                 }
                 fix+=x;
             }
-            cout<<fix<<" "<<idx<<endl;
             idx = 0;
             fix = 0;
             for(int h = 0; h < b; h++) {
