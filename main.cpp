@@ -558,6 +558,7 @@ void infera_red() {
     }
 }
 
+// Filter to pixelate the image
 void pixelate() {
     // Prompt user for pixelation radius
     int r;
@@ -589,6 +590,7 @@ void pixelate() {
     img_in = pixels;
 }
 
+// Filter to make Oil Painting effect
 void oil_painted() {
     // Create a copy of the input image to store the oil-painted effect
     Image img_oil_paint(img_in);
@@ -606,7 +608,6 @@ void oil_painted() {
     // Update the input image with the oil-painted result
     img_in = img_oil_paint;
 }
-
 
 void normframe() {
     // Prompt user for frame thickness and desired RGB values
@@ -678,6 +679,7 @@ void fanframe() {
     img_in = framed;
 }
 
+// Menu of Frames
 int frame() {
     // Prompt user for frame choice until a valid choice is made
     string framechoice;
@@ -706,6 +708,7 @@ int frame() {
     }
 }
 
+// Filter to skew image
 void Skew() {
     // Prompt user for skew angle until a valid angle is entered
     double angle;
@@ -846,11 +849,11 @@ int filters_menu() {
         cout << "O) Wanno Day\n";
         cout << "P) Wanno Night\n";
         cout << "Q) Wanno TV\n";
-        cout << "R) Infera red\n";
-        cout << "S) Oil painting\n";
+        cout << "R) Infera Red\n";
+        cout << "S) Oil Painting\n";
         cout << "T) - Bouns 2\n";
         cout << "U) Clear All Filters\n";
-        cout << "V) Back to the Main menu\n";
+        cout << "V) Back to Main menu\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
