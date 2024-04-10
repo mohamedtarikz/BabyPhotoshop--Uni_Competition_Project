@@ -198,55 +198,70 @@ void invert_image() {
 
 void resize(){
     int nw,nh;
-    int w = img_in.width, h = img_in.height;
+    int w = img_in.width, g = img_in.height;
     cout<<"Enter the new desired dimensions (\"Width Height\"): ";
     cin>>nw>>nh;
-    Image res(nw,h);
+    int x,y;
+    x = w/nw;
+    y = x + 1;
+    int a = y * nw - w;
+    int b = (w - x * a) / y;
+    int n = a * x;
+    int m = b * y;
+    Image res(a,g);
+    Image bas(b,g);
+    Image all(nw,g);
     if(nw<=w){
-        int x,y;
-        x = w/nw;
-        y = x + 1;
-        int a = y * nw - w;
-        int b = (w - x * a) / y;
-        int n = a * x;
-        int m = b * y;
         cout<<a<<" "<<b<<" "<<n<<" "<<m<<endl;
-        int idx, avg;
-        for (int j = 0; j < h; j++) {
+        int idx, fix, avg;
+        for (int j = 0; j < g; j++) {
             idx = 0;
             for(int h = 0; h < a; h++) {
                 for (int k = 0; k < 3; ++k) {
                     avg = 0;
+                    idx = fix;
                     for (int i = 0; i < x; i++) {
                         avg += img_in(idx,j,k);
                         idx++;
-                        if(idx >= w)
+                        if(idx >= w) {
                             break;
+                        }
                     }
                     avg/=x;
                     res(h,j,k) = min(avg,255);
                 }
+                fix+=x;
             }
+            cout<<fix<<" "<<idx<<endl;
+            idx = 0;
+            fix = 0;
             for(int h = 0; h < b; h++) {
-                if(idx >= w)
-                    break;
                 for (int k = 0; k < 3; ++k) {
                     avg = 0;
+                    idx = fix;
                     for (int i = 0; i < y; i++) {
                         avg += img_in(idx,j,k);
                         idx++;
-                        if(idx >= w)
+                        if(idx >= w) {
                             break;
+                        }
                     }
-                    if(idx >= w)
-                        break;
-                    avg/=y;
-                    res(h+a,j,k) = min(avg,255);
+                    avg/=x;
+                    bas(h,j,k) = min(avg,255);
+                }
+                fix+=y;
+            }
+        }
+        for(int i=0;i<all.height;i++){
+            for (int j = 0; j < all.width; ++j) {
+                for (int k = 0; k < 3; ++k) {
+                    all(j,i,k) = (j>=b? res(j-b,i,k):bas(j,i,k));
                 }
             }
         }
-        img_in = res;
         res.saveImage("try.jpg");
+        bas.saveImage("tr.jpg");
+        all.saveImage("all.jpg");
     }
 }
 
