@@ -260,22 +260,26 @@ void resize(){
         }
     }
     else{
+        cout<<x<<" "<<y<<endl;
+        cout<<a<<" "<<b<<endl;
         int idx;
         for (int j = 0; j < g; j++) {
             idx = 0;
             for(int i = 0; i < w; i++){
                 if(i>=a){
-                    for(int h = 0; h < x; h++){
+                    for(int h = 0; h < y; h++){
                         for (int k = 0; k < 3; ++k) {
-                             all(i+h,j,k) = img_in(i,j,k);
+                             all(idx,j,k) = img_in(i,j,k);
                         }
+                        idx++;
                     }
                 }
                 else{
-                    for(int h = 0; h < y; h++){
+                    for(int h = 0; h < x; h++){
                         for (int k = 0; k < 3; ++k) {
-                            all(i+h,j,k) = img_in(i,j,k);
+                            all(idx,j,k) = img_in(i,j,k);
                         }
+                        idx++;
                     }
                 }
             }
