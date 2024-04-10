@@ -196,6 +196,60 @@ void invert_image() {
     }
 }
 
+void resize(){
+    int nw,nh;
+    int w = img_in.width, h = img_in.height;
+    cout<<"Enter the new desired dimensions (\"Width Height\"): ";
+    cin>>nw>>nh;
+    Image res(nw,h);
+    if(nw<=w){
+        int x,y;
+        x = w/nw;
+        y = x + 1;
+        int a = y * nw - w;
+        int b = (w - x * a) / y;
+        int n = a * x;
+        int m = b * y;
+        cout<<a<<" "<<b<<" "<<n<<" "<<m<<endl;
+        int idx, avg;
+        for (int j = 0; j < h; j++) {
+            idx = 0;
+            for(int h = 0; h < a; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avg = 0;
+                    for (int i = 0; i < x; i++) {
+                        avg += img_in(idx,j,k);
+                        idx++;
+                        if(idx >= w)
+                            break;
+                    }
+                    avg/=x;
+                    res(h,j,k) = min(avg,255);
+                }
+            }
+            for(int h = 0; h < b; h++) {
+                if(idx >= w)
+                    break;
+                for (int k = 0; k < 3; ++k) {
+                    avg = 0;
+                    for (int i = 0; i < y; i++) {
+                        avg += img_in(idx,j,k);
+                        idx++;
+                        if(idx >= w)
+                            break;
+                    }
+                    if(idx >= w)
+                        break;
+                    avg/=y;
+                    res(h+a,j,k) = min(avg,255);
+                }
+            }
+        }
+        img_in = res;
+        res.saveImage("try.jpg");
+    }
+}
+
 // Filter to detect image edges
 void detect_edge() {
     // Convert input image to black and white
@@ -682,6 +736,56 @@ int frame() {
     }
 }
 
+void Skew() {
+    double angle;
+    string ang;
+    while (true) {
+        cout << "please enter the angle: ";
+        cin >> ang;
+        if (!isNumeric(ang)) {
+            cout << "Please enter a proper positive numeric value." << endl;
+            continue;
+        }
+        try {
+            angle = stod(ang);
+        } catch (out_of_range) {
+            cout << "Please enter a proper value" << endl;
+            continue;
+        }
+        if (((int)angle%90) == 0) {
+            cout  << "Invalid Angle. 90 and it's multiples isn't allowed!"<<endl;
+            continue;
+        }
+        if (angle > 5000) {
+            cout << "Please enter a proper value" << endl;
+            continue;
+        }
+        else {
+            break;
+        }
+    }
+    int w = ceil((img_in.height) * tan(angle * M_PI / 180.0));
+    Image img_skewed(img_in.width + w, img_in.height);
+    for (int i = 0; i < img_skewed.width; i++) {
+        for (int j = 0; j < img_skewed.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                img_skewed(i, j, k) = 255;
+            }
+        }
+    }
+    int c = 0;
+    for (int i = w; i < img_skewed.width; i++) {
+        for (int j = 0; j < img_in.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                img_skewed(i - c, j, k) = img_in(i - w, j, k);
+            }
+            c = ceil(j * tan(angle * M_PI / 180.0));
+        }
+        c = 0;
+    }
+    img_in = img_skewed;
+}
+
 // Function to prompt the user to enter an image name with its extension and load the image
 int insert() {
     while (true) { // Loop until a valid image is loaded
@@ -742,56 +846,6 @@ int save(Image img_save) {
     }
 }
 
-void Skew() {
-    double angle;
-    string ang;
-    while (true) {
-        cout << "please enter the angle: ";
-        cin >> ang;
-        if (!isNumeric(ang)) {
-            cout << "Please enter a proper positive numeric value." << endl;
-            continue;
-        }
-        try {
-            angle = stod(ang);
-        } catch (out_of_range) {
-            cout << "Please enter a proper value" << endl;
-            continue;
-        }
-        if (((int)angle%90) == 0) {
-            cout  << "Invalid Angle. 90 and it's multiples isn't allowed!"<<endl;
-            continue;
-        }
-        if (angle > 5000) {
-            cout << "Please enter a proper value" << endl;
-            continue;
-        }
-        else {
-            break;
-        }
-    }
-    int w = ceil((img_in.height) * tan(angle * M_PI / 180.0));
-    Image img_skewed(img_in.width + w, img_in.height);
-    for (int i = 0; i < img_skewed.width; i++) {
-        for (int j = 0; j < img_skewed.height; j++) {
-            for (int k = 0; k < 3; k++) {
-                img_skewed(i, j, k) = 255;
-            }
-        }
-    }
-    int c = 0;
-    for (int i = w; i < img_skewed.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
-            for (int k = 0; k < 3; k++) {
-                img_skewed(i - c, j, k) = img_in(i - w, j, k);
-            }
-            c = ceil(j * tan(angle * M_PI / 180.0));
-        }
-        c = 0;
-    }
-    img_in = img_skewed;
-}
-
 // Function to display the filters menu and apply selected filters
 int filters_menu() {
     string filterschoice;
@@ -846,7 +900,7 @@ int filters_menu() {
         } else if (filterschoice == "H") {
             edit_brightness();
         } else if (filterschoice == "I") {
-            // resize();
+            resize();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "J") {
             crop_image();
