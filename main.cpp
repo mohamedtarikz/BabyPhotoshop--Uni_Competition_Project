@@ -338,32 +338,64 @@ void blur() {
 }
 
 // Function to merge the input image with another image
-void merge_images() {
-    string second_image; // Variable to store the name of the second image
-    Image img_second; // Object to hold the second image
-    // Loop until a valid second image is loaded
-    while (true) {
-        cout << "Please enter second image name with its extension: ";
-        cin >> second_image;
-        try {
-            img_second.loadNewImage(second_image); // Attempt to load the second image
-            break;
-        } catch (invalid_argument) {
-            continue;
-        }
-    }
+void merge_images(Image img_first, Image img_second) {
     // Create a new image for merging with dimensions equal to the minimum of the two input images
-    Image img_merged(min(img_in.width, img_second.width), min(img_in.height, img_second.height));
+    Image img_merged(min(img_first.width, img_second.width), min(img_first.height, img_second.height));
     // Iterate through each pixel in the merged image
-    for (int i = 0; i < min(img_in.width, img_second.width); i++) {
-        for (int j = 0; j < min(img_in.height, img_second.height); j++) {
+    for (int i = 0; i < min(img_first.width, img_second.width); i++) {
+        for (int j = 0; j < min(img_first.height, img_second.height); j++) {
             // Average the RGB values of corresponding pixels from both images and assign to the merged image
             for (int k = 0; k < 3; k++) {
-                img_merged(i, j, k) = (img_in(i, j, k) + img_second(i, j, k)) / 2;
+                img_merged(i, j, k) = (img_first(i, j, k) + img_second(i, j, k)) / 2;
             }
         }
     }
     img_in = img_merged;
+}
+
+int merge_images_menu() {
+    string mergechoice;
+    Image img_one,img_two;
+    while (true) {
+        cout << "\n**what do you like to enter?**" << endl;
+        cout << "==============================" << endl;
+        cout << "A) Resize to the smaller dimention." << endl;
+        cout << "B) Resize to the grater dimention." << endl;
+        cout << "C) common area" << endl;
+        cout << "D) Back to filters menu" << endl;
+        cout << "==============================" << endl;
+        cout << "Enter your choice: ";
+        cin >> mergechoice;
+        transform(mergechoice.begin(), mergechoice.end(), mergechoice.begin(), ::toupper);
+        if (mergechoice != "D") {
+            string second_image; // Variable to store the name of the second image
+            // Loop until a valid second image is loaded
+            while (true) {
+                cout << "Please enter second image name with its extension: ";
+                cin >> second_image;
+                try {
+                    img_two.loadNewImage(second_image); // Attempt to load the second image
+                    break;
+                } catch (invalid_argument) {
+                    continue;
+                }
+            }
+        }
+        if (mergechoice == "A") {
+            return 0;
+        } else if (mergechoice == "B") {
+            return 0;
+        } else if (mergechoice == "C") {
+            img_one = img_in;
+            merge_images(img_one, img_two);
+            cout << "Operation completed successfully!" << endl;
+            return 0;
+        } else if (mergechoice == "D") {
+            return 0;
+        } else {
+            cout << "Please enter a valid choice" << endl;
+        }
+    }
 }
 
 // Function to flip the input image horizontally
@@ -991,6 +1023,30 @@ void resize() {
     img_in = Resizedall;
 }
 
+int resize_menu() {
+    string resizechoice;
+    while (true) {
+        cout << "\n**what do you like to enter?**" << endl;
+        cout << "==============================" << endl;
+        cout << "A) New dimentions" << endl;
+        cout << "B) Scale factor" << endl;
+        cout << "C) Back to filters menu" << endl;
+        cout << "==============================" << endl;
+        cout << "Enter your choice: ";
+        cin >> resizechoice;
+        transform(resizechoice.begin(), resizechoice.end(), resizechoice.begin(), ::toupper);
+        if (resizechoice == "A") {
+            return 0;
+        } else if (resizechoice == "B") {
+            return 0;
+        } else if (resizechoice == "C") {
+            return 0;
+        } else {
+            cout << "Please enter a valid choice" << endl;
+        }
+    }
+}
+
 // This function performs a channel swapper.
 void channel_swap() {
     // Loop through each column of the image
@@ -1107,8 +1163,7 @@ int filters_menu() {
             invert_image();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "D") {
-            merge_images();
-            cout << "Operation completed successfully!" << endl;
+            merge_images_menu();
         } else if (filterschoice == "E") {
             flip_image_menu();
         } else if (filterschoice == "F") {
