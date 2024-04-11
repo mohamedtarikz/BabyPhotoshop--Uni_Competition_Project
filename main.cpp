@@ -36,7 +36,8 @@
 
 using namespace std;
 Image img_in;
-string imginput;
+Image img_filter;
+string imginput = "NULL";
 
 bool isNumeric(string str) {
     for (int i = 0; i < str.length(); i++) {
@@ -49,17 +50,17 @@ bool isNumeric(string str) {
 // Function to convert the input image to grayscale
 void greyscale() {
     // Iterate through each pixel in the image
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
             int av = 0; // Initialize average value
             // Calculate average pixel value across RGB channels
             for (int k = 0; k < 3; k++) {
-                av += img_in(i, j, k);
+                av += img_filter(i, j, k);
             }
             av /= 3; // Compute the average
             // Set each RGB channel to the average value to convert to grayscale
             for (int k = 0; k < 3; k++) {
-                img_in(i, j, k) = av;
+                img_filter(i, j, k) = av;
             }
         }
     }
@@ -69,14 +70,14 @@ void greyscale() {
 void black_and_white() {
     // Convert the input image to grayscale
     greyscale();
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
             // Set the color of the pixel to max white or black
             for (int k = 0; k < 3; k++) {
-                if (img_in(i, j, k) < 128) {
-                    img_in(i, j, k) = 0;
+                if (img_filter(i, j, k) < 128) {
+                    img_filter(i, j, k) = 0;
                 } else {
-                    img_in(i, j, k) = 255;
+                    img_filter(i, j, k) = 255;
                 }
             }
         }
@@ -114,7 +115,7 @@ void crop_image() {
             cout << "Coordinates are out of bounds." << endl;
         }
         // Check if the specified crop area is within the bounds of the image
-        if (x > img_in.width || y > img_in.height || w > img_in.width - x || h > img_in.height - y) {
+        if (x > img_filter.width || y > img_filter.height || w > img_filter.width - x || h > img_filter.height - y) {
             cout << "Coordinates are out of bounds." << endl;
             continue;
         } else {
@@ -131,14 +132,14 @@ void crop_image() {
         for (int j = y; j < h + y; j++) {
             for (int k = 0; k < 3; k++) {
                 // Copy pixel values from input image to cropped image
-                img_cropped(M, N, k) = img_in(i, j, k);
+                img_cropped(M, N, k) = img_filter(i, j, k);
             }
             N++;
         }
         M++;
         N = 0;
     }
-    img_in = img_cropped;
+    img_filter = img_cropped;
 }
 
 // Function to darken or lighten an image based on user choice
@@ -168,13 +169,13 @@ int edit_brightness() {
         break;
     }
     // Loop through each pixel in the image
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
             for (int k = 0; k < 3; k++) {
                 if (DorL_choice == "A") {
-                    img_in(i, j, k) /= 2; // Divide pixel value by 2 to darken
+                    img_filter(i, j, k) /= 2; // Divide pixel value by 2 to darken
                 } else if (DorL_choice == "B") {
-                    img_in(i, j, k) = min(int(img_in(i, j, k) * 1.5), 255); // Multiply pixel value by 1.5 to brighten
+                    img_filter(i, j, k) = min(int(img_filter(i, j, k) * 1.5), 255); // Multiply pixel value by 1.5 to brighten
                 }
             }
         }
@@ -186,11 +187,11 @@ int edit_brightness() {
 // Function to invert the colors of the input image
 void invert_image() {
     // Iterate through each pixel in the image
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
             // Invert each RGB channel by subtracting from 255
             for (int k = 0; k < 3; k++) {
-                img_in(i, j, k) = 255 - (img_in(i, j, k));
+                img_filter(i, j, k) = 255 - (img_filter(i, j, k));
             }
         }
     }
@@ -200,17 +201,17 @@ void invert_image() {
 void detect_edge() {
     // Convert input image to black and white
     black_and_white();
-    Image img_Detected_edges(img_in.width, img_in.height);
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
+    Image img_Detected_edges(img_filter.width, img_filter.height);
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
             for (int k = 0; k < 3; k++) {
                 // Check if the current pixel is not on the image border
-                if (i != 0 && i != img_in.width - 1 && j != 0 && j != img_in.height - 1) {
+                if (i != 0 && i != img_filter.width - 1 && j != 0 && j != img_filter.height - 1) {
                     // Check if the current pixel is black and any of its neighboring pixels are white
-                    if ((img_in(i, j, k) == 0 && img_in(i - 1, j, k) == 255) ||
-                        (img_in(i, j, k) == 0 && img_in(i + 1, j, k) == 255) ||
-                        (img_in(i, j, k) == 0 && img_in(i, j - 1, k) == 255) ||
-                        (img_in(i, j, k) == 0 && img_in(i, j + 1, k) == 255)) {
+                    if ((img_filter(i, j, k) == 0 && img_filter(i - 1, j, k) == 255) ||
+                        (img_filter(i, j, k) == 0 && img_filter(i + 1, j, k) == 255) ||
+                        (img_filter(i, j, k) == 0 && img_filter(i, j - 1, k) == 255) ||
+                        (img_filter(i, j, k) == 0 && img_filter(i, j + 1, k) == 255)) {
                         // If any of the neighboring pixels are white, set the corresponding pixel in Detected_edges to black
                         img_Detected_edges(i, j, k) = 0;
                     } else {
@@ -219,12 +220,12 @@ void detect_edge() {
                     }
                 } else {
                     // If the pixel is on the image border, retain its original color in Detected_edges
-                    img_Detected_edges(i, j, k) = img_in(i, j, k);
+                    img_Detected_edges(i, j, k) = img_filter(i, j, k);
                 }
             }
         }
     }
-    img_in = img_Detected_edges;
+    img_filter = img_Detected_edges;
 }
 
 // Filter to apply blur effect
@@ -234,7 +235,7 @@ void blur() {
     int r, sr, er, sc, ec;
     long long int sum, area;
     // Create a new image for the blurred result with the same dimensions as the input image
-    Image blur_img(img_in.width, img_in.height);
+    Image blur_img(img_filter.width, img_filter.height);
     // Prompt the user to enter the blur radius
     while (true) {
         // Prompt user to enter starting X coordinate
@@ -260,8 +261,8 @@ void blur() {
         }
     }
     // Store the width and height of the input image
-    int w = img_in.width;
-    int h = img_in.height;
+    int w = img_filter.width;
+    int h = img_filter.height;
     // Initialize cumulative arrays for each color channel using dynamic memory allocation
     long long int*** cmlt = new long long int** [w + 1];
     long long int*** row = new long long int** [w + 1];
@@ -279,7 +280,7 @@ void blur() {
     for (int i = 1; i <= w; ++i) {
         for (int j = 1; j <= h; ++j) {
             for (int k = 0; k < 3; ++k) {
-                cmlt[i][j][k] = row[i][j][k] = img_in(i - 1, j - 1, k); // Copy pixel values
+                cmlt[i][j][k] = row[i][j][k] = img_filter(i - 1, j - 1, k); // Copy pixel values
             }
         }
     }
@@ -323,7 +324,7 @@ void blur() {
         }
     }
     // Update the input image with the blurred image
-    img_in = blur_img;
+    img_filter = blur_img;
     // Deallocate memory
     for (int i = 0; i <= w; ++i) {
         for (int j = 0; j <= h; ++j) {
@@ -335,6 +336,262 @@ void blur() {
     }
     delete[] cmlt;
     delete[] row;
+}
+
+// Filter to resize the image
+Image resize(Image img_resize, int newWidth, int newHeight) {
+    int width = img_resize.width, height = img_resize.height;
+    // Calculate scaling factors for width
+    int scale1, scale2;
+    scale1 = max(width, newWidth) / min(newWidth, width);
+    scale2 = scale1 + 1;
+
+    // Calculate division of the new image width into two parts
+    int FirstPart = scale2 * min(newWidth, width) - max(width, newWidth);
+    int SecondPart = (max(width, newWidth) - scale1 * FirstPart) / scale2;
+    int StartofSecondpart = SecondPart * scale2;
+
+    // Create a new image with the desired width and original height
+    Image Resized(newWidth, height);
+
+    if (newWidth <= width) {
+        // If the new width is less than or equal to the original width
+        // Create two images representing the first and second parts of the resized image
+        Image FirstImage(FirstPart, height);
+        Image SecondImage(SecondPart, height);
+        int idx, fixed, avrg;
+
+        // For each row in the image
+        for (int j = 0; j < height; j++) {
+            idx = 0;
+            fixed = StartofSecondpart;
+
+            // Process the first part of the resized image
+            for (int h = 0; h < FirstPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+
+                    // Calculate average pixel value for each channel
+                    for (int i = 0; i < scale1; i++) {
+                        avrg += img_resize(idx, j, k);
+                        idx++;
+                        if (idx >= width) {
+                            break;
+                        }
+                    }
+                    avrg /= scale1;
+                    // Assign the average pixel value to the corresponding position in the FirstImage
+                    FirstImage(h, j, k) = min(avrg, 255);
+                }
+                fixed += scale1;
+            }
+
+            // Process the second part of the resized image
+            idx = 0;
+            fixed = 0;
+            for (int h = 0; h < SecondPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+                    for (int i = 0; i < scale2; i++) {
+                        avrg += img_resize(idx, j, k);
+                        idx++;
+                        if (idx >= width) {
+                            break;
+                        }
+                    }
+                    avrg /= scale2;
+                    // Assign the average pixel value to the corresponding position in the SecondImage
+                    SecondImage(h, j, k) = min(avrg, 255);
+                }
+                fixed += scale2;
+            }
+        }
+
+        // Merge the two parts into the final resized image
+        for (int i = 0; i < Resized.height; i++) {
+            for (int j = 0; j < Resized.width; ++j) {
+                for (int k = 0; k < 3; ++k) {
+                    Resized(j, i, k) = (j >= SecondPart ? FirstImage(j - SecondPart, i, k) : SecondImage(j, i, k));
+                }
+            }
+        }
+    } else {
+        // If the new width is greater than the original width
+        // Process each row and scale the pixels accordingly
+        int idx;
+        for (int j = 0; j < height; j++) {
+            idx = 0;
+            for (int i = 0; i < width; i++) {
+                if (i >= FirstPart) {
+                    // Scale the pixels in the first part
+                    for (int h = 0; h < scale2; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resized(idx, j, k) = img_resize(i, j, k);
+                        }
+                        idx++;
+                    }
+                } else {
+                    // Scale the pixels in the second part
+                    for (int h = 0; h < scale1; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resized(idx, j, k) = img_resize(i, j, k);
+                        }
+                        idx++;
+                    }
+                }
+            }
+        }
+    }
+
+    // Update the input image to the resized image
+    img_resize = Resized;
+    width = img_resize.width;
+    height = img_resize.height;
+
+    // Calculate scaling factors for height
+    scale1 = max(height, newHeight) / min(newHeight, height);
+    scale2 = scale1 + 1;
+
+    // Calculate division of the new image height into two parts
+    FirstPart = scale2 * min(newHeight, height) - max(height, newHeight);
+    SecondPart = (max(height, newHeight) - scale1 * FirstPart) / scale2;
+    StartofSecondpart = SecondPart * scale2;
+
+    // Create a new image with the resized width and desired height
+    Image Resizedall(width, newHeight);
+
+    if (newHeight <= height) {
+        // If the new height is less than or equal to the original height
+        // Create two images representing the first and second parts of the resized image
+        Image FirstImage(width, FirstPart);
+        Image SecondImage(width, SecondPart);
+        int idx, fixed, avrg;
+
+        // For each column in the image
+        for (int j = 0; j < width; j++) {
+            idx = 0;
+            fixed = StartofSecondpart;
+
+            // Process the first part of the resized image
+            for (int h = 0; h < FirstPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+
+                    // Calculate average pixel value for each channel
+                    for (int i = 0; i < scale1; i++) {
+                        avrg += img_resize(j, idx, k);
+                        idx++;
+                        if (idx >= height) {
+                            break;
+                        }
+                    }
+                    avrg /= scale1;
+                    // Assign the average pixel value to the corresponding position in the FirstImage
+                    FirstImage(j, h, k) = min(avrg, 255);
+                }
+                fixed += scale1;
+            }
+
+            // Process the second part of the resized image
+            idx = 0;
+            fixed = 0;
+            for (int h = 0; h < SecondPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+                    for (int i = 0; i < scale2; i++) {
+                        avrg += img_resize(j, idx, k);
+                        idx++;
+                        if (idx >= height) {
+                            break;
+                        }
+                    }
+                    avrg /= scale2;
+                    // Assign the average pixel value to the corresponding position in the SecondImage
+                    SecondImage(j, h, k) = min(avrg, 255);
+                }
+                fixed += scale2;
+            }
+        }
+
+        // Merge the two parts into the final resized image
+        for (int j = 0; j < Resizedall.width; ++j) {
+            for (int i = 0; i < Resizedall.height; i++) {
+                for (int k = 0; k < 3; ++k) {
+                    Resizedall(j, i, k) = (i >= SecondPart ? FirstImage(j, i - SecondPart, k) : SecondImage(j, i, k));
+                }
+            }
+        }
+    } else {
+        // If the new height is greater than the original height
+        // Process each column and scale the pixels accordingly
+        int idx;
+        for (int j = 0; j < width; j++) {
+            idx = 0;
+            for (int i = 0; i < height; i++) {
+                if (i >= FirstPart) {
+                    // Scale the pixels in the first part
+                    for (int h = 0; h < scale2; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resizedall(j, idx, k) = img_resize(j, i, k);
+                        }
+                        idx++;
+                    }
+                } else {
+                    // Scale the pixels in the second part
+                    for (int h = 0; h < scale1; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resizedall(j, idx, k) = img_resize(j, i, k);
+                        }
+                        idx++;
+                    }
+                }
+            }
+        }
+    }
+
+    // Update the input image to the resized image
+    return Resizedall;
+}
+
+int resize_menu() {
+    string resizechoice;
+    int newWidth, newHeight;
+    Image img_resize = img_filter;
+    while (true) {
+        cout << "\n*** How do you want to Resize your image? ***\n";
+        cout << "===========================================\n";
+        cout << "A) Resize by dimensions\n";
+        cout << "B) Resize by scale\n";
+        cout << "C) Back to filters menu\n";
+        cout << "===========================================\n";
+        cout << "Enter your choice: ";
+        cin >> resizechoice;
+        transform(resizechoice.begin(), resizechoice.end(), resizechoice.begin(), ::toupper);
+        if (resizechoice == "A") {
+            cout << "Enter your new desired dimensions(\"Width Height\"): ";
+            cin >> newWidth >> newHeight;
+            img_filter = resize(img_filter, newWidth, newHeight);
+            cout << "Operation completed successfully!" << endl;
+            return 0;
+        } else if (resizechoice == "B") {
+            double scalew, scaleh;
+            cout << "Enter your desired scale for each dimension(\"ScaleWidth ScaleHeight\"): ";
+            cin >> scalew >> scaleh;
+            newWidth = (double)(img_resize.width * scalew);
+            newHeight = (double)(img_resize.height * scaleh);
+            img_filter = resize(img_filter, newWidth, newHeight);
+            cout << "Operation completed successfully!" << endl;
+            return 0;
+        } else if (resizechoice == "C") {
+            return 0;
+        } else {
+            cout << "Please enter a valid choice" << endl;
+        }
+    }
 }
 
 // Function to merge the input image with another image
@@ -350,18 +607,20 @@ void merge_images(Image img_first, Image img_second) {
             }
         }
     }
-    img_in = img_merged;
+    img_filter = img_merged;
 }
 
 int merge_images_menu() {
     string mergechoice;
-    Image img_one,img_two;
+    Image img_one, img_two;
+    int max_width, max_hight, min_width, min_hight;
+    img_one = img_filter;
     while (true) {
         cout << "\n**what do you like to enter?**" << endl;
         cout << "==============================" << endl;
-        cout << "A) Resize to the smaller dimention." << endl;
-        cout << "B) Resize to the grater dimention." << endl;
-        cout << "C) common area" << endl;
+        cout << "A) Resize to the smallest dimention" << endl;
+        cout << "B) Resize to the gratest dimention" << endl;
+        cout << "C) merge common area" << endl;
         cout << "D) Back to filters menu" << endl;
         cout << "==============================" << endl;
         cout << "Enter your choice: ";
@@ -381,12 +640,33 @@ int merge_images_menu() {
                 }
             }
         }
+        if (img_one.width > img_two.width) {
+            max_width = img_one.width;
+            min_width = img_two.width;
+        } else {
+            max_width = img_two.width;
+            min_width = img_one.width;
+        }
+        if (img_one.height > img_two.height) {
+            max_hight = img_one.height;
+            min_hight = img_two.height;
+        } else {
+            max_hight = img_two.height;
+            min_hight = img_one.height;
+        }
         if (mergechoice == "A") {
+            img_one = resize(img_one, min_width, min_hight);
+            img_two = resize(img_two, min_width, min_hight);
+            merge_images(img_one, img_two);
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (mergechoice == "B") {
+            img_one = resize(img_one, max_width, max_hight);
+            img_two = resize(img_two, max_width, max_hight);
+            merge_images(img_one, img_two);
+            cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (mergechoice == "C") {
-            img_one = img_in;
             merge_images(img_one, img_two);
             cout << "Operation completed successfully!" << endl;
             return 0;
@@ -401,33 +681,33 @@ int merge_images_menu() {
 // Function to flip the input image horizontally
 void flip_horizontally() {
     // Create a new image to store the horizontally flipped image
-    Image img_flipped(img_in.width, img_in.height);
+    Image img_flipped(img_filter.width, img_filter.height);
     // Iterate through each pixel in the image
-    for (int i = img_in.width - 1; i >= 0; i--) {
-        for (int j = 0; j < img_in.height; j++) {
+    for (int i = img_filter.width - 1; i >= 0; i--) {
+        for (int j = 0; j < img_filter.height; j++) {
             // Flip the image in the x-direction
             for (int k = 0; k < 3; k++) {
-                img_flipped(img_in.width - 1 - i, j, k) = img_in(i, j, k);
+                img_flipped(img_filter.width - 1 - i, j, k) = img_filter(i, j, k);
             }
         }
     }
-    img_in = img_flipped;
+    img_filter = img_flipped;
 }
 
 // Function to flip the input image vertically
 void flip_vertically() {
     // Create a new image to store the vertically flipped image
-    Image img_flipped(img_in.width, img_in.height);
+    Image img_flipped(img_filter.width, img_filter.height);
     // Iterate through each pixel in the image
-    for (int j = img_in.height - 1; j >= 0; j--) {
-        for (int i = 0; i < img_in.width; i++) {
+    for (int j = img_filter.height - 1; j >= 0; j--) {
+        for (int i = 0; i < img_filter.width; i++) {
             // Flip the image in the y-direction
             for (int k = 0; k < 3; k++) {
-                img_flipped(i, img_in.height - 1 - j, k) = img_in(i, j, k);
+                img_flipped(i, img_filter.height - 1 - j, k) = img_filter(i, j, k);
             }
         }
     }
-    img_in = img_flipped;
+    img_filter = img_flipped;
 }
 
 // flipping an image using user choice of direction menu
@@ -468,19 +748,19 @@ int flip_image_menu() {
 // This function rotates an image 90 degrees clockwise.
 void rotate_image_90deg() {
     // Create a new Image object with dimensions swapped to accommodate rotation.
-    Image img_rotated(img_in.height, img_in.width);
+    Image img_rotated(img_filter.height, img_filter.width);
     // Iterate over the pixels of the original image.
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
             // Iterate over the color channels (assuming RGB here).
             for (int k = 0; k < 3; k++) {
                 // Assign pixel value from original image to the corresponding position
                 // in the rotated image, swapping x and y coordinates.
-                img_rotated(j, i, k) = img_in(i, j, k);
+                img_rotated(j, i, k) = img_filter(i, j, k);
             }
         }
     }
-    img_in = img_rotated;
+    img_filter = img_rotated;
 }
 
 // This function provides options to rotate the image based on user input.
@@ -525,66 +805,66 @@ void rotate_image_menu() {
 // Function to apply a "Wanno Day" filter to the input image
 void Wanno_Day() {
     // Create a new image with the same dimensions as the input image
-    Image Wanno_Day_img(img_in.width, img_in.height);
+    Image Wanno_Day_img(img_filter.width, img_filter.height);
     // Loop through each pixel in the input image
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
-            Wanno_Day_img(i, j, 0) = min((img_in(i, j, 0) + 20), 255);
-            Wanno_Day_img(i, j, 1) = min((img_in(i, j, 1) + 20), 255);
-            Wanno_Day_img(i, j, 2) = max((img_in(i, j, 2) - 40), 0);
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
+            Wanno_Day_img(i, j, 0) = min((img_filter(i, j, 0) + 20), 255);
+            Wanno_Day_img(i, j, 1) = min((img_filter(i, j, 1) + 20), 255);
+            Wanno_Day_img(i, j, 2) = max((img_filter(i, j, 2) - 40), 0);
         }
     }
-    img_in = Wanno_Day_img;
+    img_filter = Wanno_Day_img;
 }
 
 // Function to apply a "Wanno Night" filter to the input image
 void Wanno_Night() {
     // Create a new image with the same dimensions as the input image
-    Image Wanno_Night_img(img_in.width, img_in.height);
+    Image Wanno_Night_img(img_filter.width, img_filter.height);
     // Loop through each pixel in the input image
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
-            Wanno_Night_img(i, j, 0) = min((img_in(i, j, 0) + 20), 255);
-            Wanno_Night_img(i, j, 1) = max((img_in(i, j, 1) - 40), 0);
-            Wanno_Night_img(i, j, 2) = min((img_in(i, j, 2) + 20), 255);
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
+            Wanno_Night_img(i, j, 0) = min((img_filter(i, j, 0) + 20), 255);
+            Wanno_Night_img(i, j, 1) = max((img_filter(i, j, 1) - 40), 0);
+            Wanno_Night_img(i, j, 2) = min((img_filter(i, j, 2) + 20), 255);
         }
     }
-    img_in = Wanno_Night_img;
+    img_filter = Wanno_Night_img;
 }
 
 // Function to apply noise "Wanno TV" filter to the input image
 void Wanno_TV() {
     srand(unsigned(time(0)));
     // Create a new image with the same dimensions as the input image
-    Image Wanno_TV_img(img_in.width, img_in.height);
+    Image Wanno_TV_img(img_filter.width, img_filter.height);
     // Loop through each pixel in the input image
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
             for (int k = 0; k < 3; k++) {
                 int randomvalue = rand() % 21;
-                if (img_in(i, j, k) > 20) { // If pixel has vale more than  225 set it to its original value
-                    Wanno_TV_img(i, j, k) = min(int((img_in(i, j, k) - randomvalue) * 1.07), 255); // subtract a random value  between 1 and 20 to make noise
+                if (img_filter(i, j, k) > 20) { // If pixel has vale more than  225 set it to its original value
+                    Wanno_TV_img(i, j, k) = min(int((img_filter(i, j, k) - randomvalue) * 1.07), 255); // subtract a random value  between 1 and 20 to make noise
                 } else {
-                    Wanno_TV_img(i, j, k) = img_in(i, j, k) + 1;
+                    Wanno_TV_img(i, j, k) = img_filter(i, j, k) + 1;
                 }
             }
         }
     }
-    img_in = Wanno_TV_img;
+    img_filter = Wanno_TV_img;
 }
 
 // Function to invert the red channel of the input image
 void infera_red() {
-    for (int i = 0; i < img_in.width; i++) {
-        for (int j = 0; j < img_in.height; j++) {
+    for (int i = 0; i < img_filter.width; i++) {
+        for (int j = 0; j < img_filter.height; j++) {
             for (int k = 0; k < 3; k++) {
                 // If the current channel is the red channel (k = 0)
                 if (k == 0) {
                     // Set the red channel to the maximum value of 255
-                    img_in(i, j, k) = 255;
+                    img_filter(i, j, k) = 255;
                 } else {
                     // Otherwise, invert the current channel (subtract the value of the current channel from 255)
-                    img_in(i, j, k) = 255 - img_in(i, j, k);
+                    img_filter(i, j, k) = 255 - img_filter(i, j, k);
                 }
             }
         }
@@ -598,35 +878,35 @@ void pixelate() {
     cout << "Enter radius of pixelation (the more the stronger the effect) (0 - 10): ";
     cin >> r;
     // Create a new image to store the pixelated result
-    Image pixels(img_in.width, img_in.height);
+    Image pixels(img_filter.width, img_filter.height);
     // Iterate through the image pixels with step size of r
-    for (int i = 0; i < img_in.width; i += r) {
-        for (int j = 0; j < img_in.height; j += r) {
+    for (int i = 0; i < img_filter.width; i += r) {
+        for (int j = 0; j < img_filter.height; j += r) {
             for (int k = 0; k < 3; k++) {
-                unsigned char x = img_in(i, j, k);
+                unsigned char x = img_filter(i, j, k);
                 // Find the maximum color value within the pixel block
                 for (int l = 0; l < r; ++l) {
                     for (int m = 0; m < r; ++m) {
-                        x = max((int)x, (int)img_in(min(i + l, img_in.width - 1), min(j + m, img_in.height - 1), k));
+                        x = max((int)x, (int)img_filter(min(i + l, img_filter.width - 1), min(j + m, img_filter.height - 1), k));
                     }
                 }
                 // Set the pixel block to the maximum color value
                 for (int l = 0; l < r; ++l) {
                     for (int m = 0; m < r; ++m) {
-                        pixels(min(i + l, img_in.width - 1), min(j + m, img_in.height - 1), k) = x;
+                        pixels(min(i + l, img_filter.width - 1), min(j + m, img_filter.height - 1), k) = x;
                     }
                 }
             }
         }
     }
     // Update the input image with the pixelated result
-    img_in = pixels;
+    img_filter = pixels;
 }
 
 // Filter to make Oil Painting effect
 void oil_painted() {
     // Create a copy of the input image to store the oil-painted effect
-    Image img_oil_paint(img_in);
+    Image img_oil_paint(img_filter);
     // Reduce the color precision of each pixel
     for (int i = 0; i < img_oil_paint.width; i++) {
         for (int j = 0; j < img_oil_paint.height; j++) {
@@ -639,7 +919,7 @@ void oil_painted() {
         }
     }
     // Update the input image with the oil-painted result
-    img_in = img_oil_paint;
+    img_filter = img_oil_paint;
 }
 
 void normframe() {
@@ -650,7 +930,7 @@ void normframe() {
     cout << "Enter the desired RGB values (\"Rval Gval Bval\"): ";
     cin >> r >> g >> b;
     // Create a new image for the framed result
-    Image framed(img_in.width + 2 * x, img_in.height + 2 * x);
+    Image framed(img_filter.width + 2 * x, img_filter.height + 2 * x);
     // Fill the frame area with the desired RGB values
     for (int i = 0; i < framed.width; i++) {
         for (int j = 0; j < framed.height; j++) {
@@ -660,16 +940,16 @@ void normframe() {
         }
     }
     // Copy the original image into the frame area
-    for (int i = x; i < x + img_in.width; i++) {
-        for (int j = x; j < x + img_in.height; j++) {
+    for (int i = x; i < x + img_filter.width; i++) {
+        for (int j = x; j < x + img_filter.height; j++) {
             for (int k = 0; k < 3; k++) {
-                framed(i, j, k) = img_in(i - x, j - x, k);
+                framed(i, j, k) = img_filter(i - x, j - x, k);
             }
         }
     }
     // Save the framed image and update the input image
     framed.saveImage("framed.png");
-    img_in = framed;
+    img_filter = framed;
 }
 
 void fanframe() {
@@ -682,7 +962,7 @@ void fanframe() {
     cout << "Enter second desired RGB values (\"Rval Gval Bval\"): ";
     cin >> r2 >> g2 >> b2;
     // Create a new image for the framed result
-    Image framed(img_in.width + 2 * x, img_in.height + 2 * x);
+    Image framed(img_filter.width + 2 * x, img_filter.height + 2 * x);
     int y = x / 2;
     // Fill the outer frame with the first set of RGB values
     for (int i = 0; i < framed.width; i++) {
@@ -701,15 +981,15 @@ void fanframe() {
         }
     }
     // Copy the original image into the frame area
-    for (int i = x; i < x + img_in.width; i++) {
-        for (int j = x; j < x + img_in.height; j++) {
+    for (int i = x; i < x + img_filter.width; i++) {
+        for (int j = x; j < x + img_filter.height; j++) {
             for (int k = 0; k < 3; k++) {
-                framed(i, j, k) = img_in(i - x, j - x, k);
+                framed(i, j, k) = img_filter(i - x, j - x, k);
             }
         }
     }
     // Update the input image with the framed result
-    img_in = framed;
+    img_filter = framed;
 }
 
 // Menu of Frames
@@ -771,9 +1051,9 @@ void Skew() {
         }
     }
     // Calculate the width expansion due to skewing
-    int w = ceil((img_in.height) * tan(angle * M_PI / 180.0));
+    int w = ceil((img_filter.height) * tan(angle * M_PI / 180.0));
     // Create a new image for the skewed result
-    Image img_skewed(img_in.width + w, img_in.height);
+    Image img_skewed(img_filter.width + w, img_filter.height);
     // Fill the new image with white color
     for (int i = 0; i < img_skewed.width; i++) {
         for (int j = 0; j < img_skewed.height; j++) {
@@ -785,10 +1065,10 @@ void Skew() {
     // Skew the original image and copy it to the new image
     int c = 0;
     for (int i = w; i < img_skewed.width; i++) { // Iterate through the columns of the skewed image, starting from the width expansion due to skewing (w)
-        for (int j = 0; j < img_in.height; j++) {
+        for (int j = 0; j < img_filter.height; j++) {
             for (int k = 0; k < 3; k++) {
                 // Copy the pixel value from the original image to the skewed image, applying the horizontal offset (c) to the column index (i)
-                img_skewed(i - c, j, k) = img_in(i - w, j, k);
+                img_skewed(i - c, j, k) = img_filter(i - w, j, k);
             }
             // Calculate the horizontal offset (c) for each row in the skewed image based on the skew angle and current row index (j)
             c = ceil(j * tan(angle * M_PI / 180.0));
@@ -796,273 +1076,19 @@ void Skew() {
         c = 0;
     }
     // Update the input image with the skewed result
-    img_in = img_skewed;
+    img_filter = img_skewed;
 }
-
-// Filter to resize the image
-void resize() {
-    int newWidth, newHeight;
-    int width = img_in.width, height = img_in.height;
-    // Prompt user to enter new dimensions
-    cout<<"A- Resize by dimension"<<endl;
-    cout<<"B- Resize by scale"<<endl;
-    cout<<"C- Return"<<endl;
-
-    string choice;
-    while (true) {
-        cout << "\n*** How do you want to Resize your image? ***\n";
-        cout << "===========================================\n";
-        cout << "A) Resize by dimensions\n";
-        cout << "B) Resize by scale\n";
-        cout << "C) Back to filters menu\n";
-        cout << "===========================================\n";
-        cout << "Enter your choice: ";
-        cin >> choice;
-        transform(choice.begin(), choice.end(), choice.begin(), ::toupper);
-        if (choice == "A") {
-            cout<<"Enter your new desired dimensions(\"Width Height\"): ";
-            cin>>newWidth>>newHeight;
-            break;
-        } else if (choice == "B") {
-            double scalew,scaleh;
-            cout<<"Enter your desired scale for each dimension(\"ScaleWidth ScaleHeight\"): ";
-            cin>>scalew>>scaleh;
-            newWidth = width * scalew;
-            newHeight = height * scaleh;
-            break;
-        } else if (choice == "C") {
-            return;
-        } else {
-            cout << "Please enter a valid choice" << endl;
-        }
-    }
-    // Calculate scaling factors for width
-    int scale1, scale2;
-    scale1 = max(width, newWidth) / min(newWidth, width);
-    scale2 = scale1 + 1;
-
-    // Calculate division of the new image width into two parts
-    int FirstPart = scale2 * min(newWidth, width) - max(width, newWidth);
-    int SecondPart = (max(width, newWidth) - scale1 * FirstPart) / scale2;
-    int StartofSecondpart = SecondPart * scale2;
-
-    // Create a new image with the desired width and original height
-    Image Resized(newWidth, height);
-
-    if (newWidth <= width) {
-        // If the new width is less than or equal to the original width
-        // Create two images representing the first and second parts of the resized image
-        Image FirstImage(FirstPart, height);
-        Image SecondImage(SecondPart, height);
-        int idx, fixed, avrg;
-
-        // For each row in the image
-        for (int j = 0; j < height; j++) {
-            idx = 0;
-            fixed = StartofSecondpart;
-
-            // Process the first part of the resized image
-            for (int h = 0; h < FirstPart; h++) {
-                for (int k = 0; k < 3; ++k) {
-                    avrg = 0;
-                    idx = fixed;
-
-                    // Calculate average pixel value for each channel
-                    for (int i = 0; i < scale1; i++) {
-                        avrg += img_in(idx, j, k);
-                        idx++;
-                        if (idx >= width) {
-                            break;
-                        }
-                    }
-                    avrg /= scale1;
-                    // Assign the average pixel value to the corresponding position in the FirstImage
-                    FirstImage(h, j, k) = min(avrg, 255);
-                }
-                fixed += scale1;
-            }
-
-            // Process the second part of the resized image
-            idx = 0;
-            fixed = 0;
-            for (int h = 0; h < SecondPart; h++) {
-                for (int k = 0; k < 3; ++k) {
-                    avrg = 0;
-                    idx = fixed;
-                    for (int i = 0; i < scale2; i++) {
-                        avrg += img_in(idx, j, k);
-                        idx++;
-                        if (idx >= width) {
-                            break;
-                        }
-                    }
-                    avrg /= scale2;
-                    // Assign the average pixel value to the corresponding position in the SecondImage
-                    SecondImage(h, j, k) = min(avrg, 255);
-                }
-                fixed += scale2;
-            }
-        }
-
-        // Merge the two parts into the final resized image
-        for (int i = 0; i < Resized.height; i++) {
-            for (int j = 0; j < Resized.width; ++j) {
-                for (int k = 0; k < 3; ++k) {
-                    Resized(j, i, k) = (j >= SecondPart ? FirstImage(j - SecondPart, i, k) : SecondImage(j, i, k));
-                }
-            }
-        }
-    } else {
-        // If the new width is greater than the original width
-        // Process each row and scale the pixels accordingly
-        int idx;
-        for (int j = 0; j < height; j++) {
-            idx = 0;
-            for (int i = 0; i < width; i++) {
-                if (i >= FirstPart) {
-                    // Scale the pixels in the first part
-                    for (int h = 0; h < scale2; h++) {
-                        for (int k = 0; k < 3; ++k) {
-                            Resized(idx, j, k) = img_in(i, j, k);
-                        }
-                        idx++;
-                    }
-                } else {
-                    // Scale the pixels in the second part
-                    for (int h = 0; h < scale1; h++) {
-                        for (int k = 0; k < 3; ++k) {
-                            Resized(idx, j, k) = img_in(i, j, k);
-                        }
-                        idx++;
-                    }
-                }
-            }
-        }
-    }
-
-    // Update the input image to the resized image
-    img_in = Resized;
-    width = img_in.width;
-    height = img_in.height;
-
-    // Calculate scaling factors for height
-    scale1 = max(height, newHeight) / min(newHeight, height);
-    scale2 = scale1 + 1;
-
-    // Calculate division of the new image height into two parts
-    FirstPart = scale2 * min(newHeight, height) - max(height, newHeight);
-    SecondPart = (max(height, newHeight) - scale1 * FirstPart) / scale2;
-    StartofSecondpart = SecondPart * scale2;
-
-    // Create a new image with the resized width and desired height
-    Image Resizedall(width, newHeight);
-
-    if (newHeight <= height) {
-        // If the new height is less than or equal to the original height
-        // Create two images representing the first and second parts of the resized image
-        Image FirstImage(width, FirstPart);
-        Image SecondImage(width, SecondPart);
-        int idx, fixed, avrg;
-
-        // For each column in the image
-        for (int j = 0; j < width; j++) {
-            idx = 0;
-            fixed = StartofSecondpart;
-
-            // Process the first part of the resized image
-            for (int h = 0; h < FirstPart; h++) {
-                for (int k = 0; k < 3; ++k) {
-                    avrg = 0;
-                    idx = fixed;
-
-                    // Calculate average pixel value for each channel
-                    for (int i = 0; i < scale1; i++) {
-                        avrg += img_in(j, idx, k);
-                        idx++;
-                        if (idx >= height) {
-                            break;
-                        }
-                    }
-                    avrg /= scale1;
-                    // Assign the average pixel value to the corresponding position in the FirstImage
-                    FirstImage(j, h, k) = min(avrg, 255);
-                }
-                fixed += scale1;
-            }
-
-            // Process the second part of the resized image
-            idx = 0;
-            fixed = 0;
-            for (int h = 0; h < SecondPart; h++) {
-                for (int k = 0; k < 3; ++k) {
-                    avrg = 0;
-                    idx = fixed;
-                    for (int i = 0; i < scale2; i++) {
-                        avrg += img_in(j, idx, k);
-                        idx++;
-                        if (idx >= height) {
-                            break;
-                        }
-                    }
-                    avrg /= scale2;
-                    // Assign the average pixel value to the corresponding position in the SecondImage
-                    SecondImage(j, h, k) = min(avrg, 255);
-                }
-                fixed += scale2;
-            }
-        }
-
-        // Merge the two parts into the final resized image
-        for (int j = 0; j < Resizedall.width; ++j) {
-            for (int i = 0; i < Resizedall.height; i++) {
-                for (int k = 0; k < 3; ++k) {
-                    Resizedall(j, i, k) = (i >= SecondPart ? FirstImage(j, i - SecondPart, k) : SecondImage(j, i, k));
-                }
-            }
-        }
-    } else {
-        // If the new height is greater than the original height
-        // Process each column and scale the pixels accordingly
-        int idx;
-        for (int j = 0; j < width; j++) {
-            idx = 0;
-            for (int i = 0; i < height; i++) {
-                if (i >= FirstPart) {
-                    // Scale the pixels in the first part
-                    for (int h = 0; h < scale2; h++) {
-                        for (int k = 0; k < 3; ++k) {
-                            Resizedall(j, idx, k) = img_in(j, i, k);
-                        }
-                        idx++;
-                    }
-                } else {
-                    // Scale the pixels in the second part
-                    for (int h = 0; h < scale1; h++) {
-                        for (int k = 0; k < 3; ++k) {
-                            Resizedall(j, idx, k) = img_in(j, i, k);
-                        }
-                        idx++;
-                    }
-                }
-            }
-        }
-    }
-
-    // Update the input image to the resized image
-    img_in = Resizedall;
-}
-
 
 // This function performs a channel swapper.
 void channel_swap() {
     // Loop through each column of the image
-    for (int i = 0; i < img_in.width; i++) {
+    for (int i = 0; i < img_filter.width; i++) {
         // Loop through each row of the image
-        for (int j = 0; j < img_in.height; ++j) {
+        for (int j = 0; j < img_filter.height; ++j) {
             // Swap the red channel (index 0) with the blue channel (index 2)
-            swap(img_in(i, j, 0), img_in(i, j, 2));
+            swap(img_filter(i, j, 0), img_filter(i, j, 2));
             // Swap the green channel (index 1) with the blue channel (index 2)
-            swap(img_in(i, j, 1), img_in(i, j, 2));
+            swap(img_filter(i, j, 1), img_filter(i, j, 2));
         }
     }
 }
@@ -1079,6 +1105,7 @@ int insert() {
             continue;
         }
     }
+    img_filter = img_in;
     return 0;
 }
 
@@ -1108,6 +1135,7 @@ int save(Image img_save) {
                     continue;
                 }
             }
+            cout << "Image Saved!" << endl;
             return 0;
         } else if (savechoice == "B") {
             while (true) {
@@ -1118,6 +1146,7 @@ int save(Image img_save) {
                     continue;
                 }
             }
+            cout << "Image Saved!" << endl;
             return 0;
         } else if (savechoice == "C") {
             return 0;
@@ -1180,8 +1209,7 @@ int filters_menu() {
         } else if (filterschoice == "H") {
             edit_brightness();
         } else if (filterschoice == "I") {
-            resize();
-            cout << "Operation completed successfully!" << endl;
+            resize_menu();
         } else if (filterschoice == "J") {
             crop_image();
             cout << "Operation completed successfully!" << endl;
@@ -1215,7 +1243,7 @@ int filters_menu() {
         } else if (filterschoice == "T") {
             channel_swap();
         } else if (filterschoice == "U") {
-            img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
+            img_filter = img_in;
             cout << "All filters have been cleared!" << endl;
         } else if (filterschoice == "V") {
             return 0;
@@ -1245,10 +1273,19 @@ int main() {
             insert();
             cout << "Image Inserted!" << endl;
         } else if (choice == "B") {
-            filters_menu();
+            if (imginput == "NULL") {
+                cout << "Please insert an image first! Use option A." << endl;
+                continue;
+            } else {
+                filters_menu();
+            }
         } else if (choice == "C") {
-            save(img_in);
-            cout << "Image Saved!" << endl;
+            if (imginput == "NULL") {
+                cout << "Please insert an image first! Use option A." << endl;
+                continue;
+            } else {
+                save(img_filter);
+            }
         } else if (choice == "D") {
             return 0;
         } else {
