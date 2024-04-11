@@ -366,6 +366,15 @@ void resize(){
     img_in = Resizedall;
 }
 
+void channel_swap(){
+    for(int i = 0; i < img_in.width; i++){
+        for (int j = 0; j < img_in.height; ++j) {
+            swap(img_in(i,j,0),img_in(i,j,2));
+            swap(img_in(i,j,1),img_in(i,j,2));
+        }
+    }
+}
+
 // Filter to detect image edges
 void detect_edge() {
     // Convert input image to black and white
@@ -976,7 +985,7 @@ int filters_menu() {
         cout << "F) Rotate\n";
         cout << "G) Skew\n";
         cout << "H) Edit Brightness\n";
-        cout << "I) - Resize\n";
+        cout << "I) Resize\n";
         cout << "J) Crop\n";
         cout << "K) Blur\n";
         cout << "L) Pixlate\n";
@@ -987,7 +996,7 @@ int filters_menu() {
         cout << "Q) Wanno TV\n";
         cout << "R) Infera red\n";
         cout << "S) Oil painting\n";
-        cout << "T) - Bouns 2\n";
+        cout << "T) Channel swap\n";
         cout << "U) Clear All Filters\n";
         cout << "V) Back to the Main menu\n";
         cout << "========================\n";
@@ -1049,7 +1058,7 @@ int filters_menu() {
             oil_painted();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "T") {
-            // bouns2();
+            channel_swap();
         } else if (filterschoice == "U") {
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl;
