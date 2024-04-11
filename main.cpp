@@ -1052,13 +1052,13 @@ void resize() {
 // This function performs a channel swapper.
 void channel_swap() {
     // Loop through each column of the image
-    for(int i = 0; i < img_in.width; i++) {
+    for (int i = 0; i < img_in.width; i++) {
         // Loop through each row of the image
         for (int j = 0; j < img_in.height; ++j) {
             // Swap the red channel (index 0) with the blue channel (index 2)
-            swap(img_in(i,j,0), img_in(i,j,2));
+            swap(img_in(i, j, 0), img_in(i, j, 2));
             // Swap the green channel (index 1) with the blue channel (index 2)
-            swap(img_in(i,j,1), img_in(i,j,2));
+            swap(img_in(i, j, 1), img_in(i, j, 2));
         }
     }
 }
