@@ -804,9 +804,38 @@ void resize() {
     int newWidth, newHeight;
     int width = img_in.width, height = img_in.height;
     // Prompt user to enter new dimensions
-    cout << "Enter the new desired dimensions (\"Width Height\"): ";
-    cin >> newWidth >> newHeight;
+    cout<<"A- Resize by dimension"<<endl;
+    cout<<"B- Resize by scale"<<endl;
+    cout<<"C- Return"<<endl;
 
+    string choice;
+    while (true) {
+        cout << "\n*** How do you want to Resize your image? ***\n";
+        cout << "===========================================\n";
+        cout << "A) Resize by dimensions\n";
+        cout << "B) Resize by scale\n";
+        cout << "C) Back to filters menu\n";
+        cout << "===========================================\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+        transform(choice.begin(), choice.end(), choice.begin(), ::toupper);
+        if (choice == "A") {
+            cout<<"Enter your new desired dimensions(\"Width Height\"): ";
+            cin>>newWidth>>newHeight;
+            break;
+        } else if (choice == "B") {
+            double scalew,scaleh;
+            cout<<"Enter your desired scale for each dimension(\"ScaleWidth ScaleHeight\"): ";
+            cin>>scalew>>scaleh;
+            newWidth = width * scalew;
+            newHeight = height * scaleh;
+            break;
+        } else if (choice == "C") {
+            return;
+        } else {
+            cout << "Please enter a valid choice" << endl;
+        }
+    }
     // Calculate scaling factors for width
     int scale1, scale2;
     scale1 = max(width, newWidth) / min(newWidth, width);
@@ -1023,29 +1052,6 @@ void resize() {
     img_in = Resizedall;
 }
 
-int resize_menu() {
-    string resizechoice;
-    while (true) {
-        cout << "\n**what do you like to enter?**" << endl;
-        cout << "==============================" << endl;
-        cout << "A) New dimentions" << endl;
-        cout << "B) Scale factor" << endl;
-        cout << "C) Back to filters menu" << endl;
-        cout << "==============================" << endl;
-        cout << "Enter your choice: ";
-        cin >> resizechoice;
-        transform(resizechoice.begin(), resizechoice.end(), resizechoice.begin(), ::toupper);
-        if (resizechoice == "A") {
-            return 0;
-        } else if (resizechoice == "B") {
-            return 0;
-        } else if (resizechoice == "C") {
-            return 0;
-        } else {
-            cout << "Please enter a valid choice" << endl;
-        }
-    }
-}
 
 // This function performs a channel swapper.
 void channel_swap() {
