@@ -934,13 +934,13 @@ void oil_painted() {
 
 void normal_frame() {
     // Prompt user for frame thickness and desired RGB values
-    int x, r, g, b;
+    int thck, r, g, b;
     cout << "Enter frame thickness: ";
-    cin >> x;
+    cin >> thck;
     cout << "Enter the desired RGB values (\"Rval Gval Bval\"): ";
     cin >> r >> g >> b;
     // Create a new image for the framed result
-    Image framed(img_filter.width + 2 * x, img_filter.height + 2 * x);
+    Image framed(img_filter.width + 2 * thck, img_filter.height + 2 * thck);
     // Fill the frame area with the desired RGB values
     for (int i = 0; i < framed.width; i++) {
         for (int j = 0; j < framed.height; j++) {
@@ -950,10 +950,10 @@ void normal_frame() {
         }
     }
     // Copy the original image into the frame area
-    for (int i = x; i < x + img_filter.width; i++) {
-        for (int j = x; j < x + img_filter.height; j++) {
+    for (int i = thck; i < thck + img_filter.width; i++) {
+        for (int j = thck; j < thck + img_filter.height; j++) {
             for (int k = 0; k < 3; k++) {
-                framed(i, j, k) = img_filter(i - x, j - x, k);
+                framed(i, j, k) = img_filter(i - thck, j - thck, k);
             }
         }
     }
@@ -964,16 +964,16 @@ void normal_frame() {
 
 void fancy_frame() {
     // Prompt user for frame thickness and desired RGB values for both frames
-    int x, r1, g1, b1, r2, g2, b2;
+    int thck, r1, g1, b1, r2, g2, b2;
     cout << "Enter frame Thickness: ";
-    cin >> x;
+    cin >> thck;
     cout << "Enter first desired RGB values (\"Rval Gval Bval\"): ";
     cin >> r1 >> g1 >> b1;
     cout << "Enter second desired RGB values (\"Rval Gval Bval\"): ";
     cin >> r2 >> g2 >> b2;
     // Create a new image for the framed result
-    Image framed(img_filter.width + 2 * x, img_filter.height + 2 * x);
-    int y = x / 2;
+    Image framed(img_filter.width + 2 * thck, img_filter.height + 2 * thck);
+    int y = thck / 2;
     // Fill the outer frame with the first set of RGB values
     for (int i = 0; i < framed.width; i++) {
         for (int j = 0; j < framed.height; j++) {
@@ -991,10 +991,10 @@ void fancy_frame() {
         }
     }
     // Copy the original image into the frame area
-    for (int i = x; i < x + img_filter.width; i++) {
-        for (int j = x; j < x + img_filter.height; j++) {
+    for (int i = thck; i < thck + img_filter.width; i++) {
+        for (int j = thck; j < thck + img_filter.height; j++) {
             for (int k = 0; k < 3; k++) {
-                framed(i, j, k) = img_filter(i - x, j - x, k);
+                framed(i, j, k) = img_filter(i - thck, j - thck, k);
             }
         }
     }
@@ -1002,16 +1002,34 @@ void fancy_frame() {
     img_filter = framed;
 }
 
+void frame_blur(){
+    Image blr(img_filter);
+    blur();
+    int thck;
+    cout<<"Enter frame thickness: ";
+    cin>>thck;
+    int w = img_filter.width, h = img_filter.height;
+    img_filter = resize(img_filter,2*thck + w, 2*thck + h);
+    for (int i = thck; i < thck + blr.width; i++) {
+        for (int j = thck; j < thck + blr.height; j++) {
+            for (int k = 0; k < 3; k++) {
+                img_filter(i, j, k) = blr(i - thck, j - thck, k);
+            }
+        }
+    }
+}
+
 // Menu of Frames
-int frame() {
+void frame() {
     // Prompt user for frame choice until a valid choice is made
     string framechoice;
     while (true) {
-        cout << "\n*** How do you want to save your image? ***\n";
+        cout << "\n*** How do you want to frame your image? ***\n";
         cout << "===========================================\n";
         cout << "A) Normal Frame\n";
         cout << "B) Fancy Frame\n";
-        cout << "C) Back to the Main menu\n";
+        cout << "C) Blured Frame\n";
+        cout << "D) Back to the Main menu\n";
         cout << "===========================================\n";
         cout << "Enter your choice: ";
         cin >> framechoice;
@@ -1019,13 +1037,20 @@ int frame() {
         // Process user's frame choice
         if (framechoice == "A") {
             normal_frame();
-            return 0;
-        } else if (framechoice == "B") {
+            return;
+        }
+        else if (framechoice == "B") {
             fancy_frame();
-            return 0;
-        } else if (framechoice == "C") {
-            return 0;
-        } else {
+            return;
+        }
+        else if (framechoice == "C"){
+            frame_blur();
+            return;
+        }
+        else if (framechoice == "D") {
+            return;
+        }
+        else {
             cout << "Please enter a valid choice" << endl;
         }
     }
