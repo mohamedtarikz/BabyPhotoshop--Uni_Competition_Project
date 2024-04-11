@@ -315,6 +315,7 @@ void detect_edge() {
     img_in = img_Detected_edges;
 }
 
+// Filter to apply blur effect
 void blur() {
     // Declare variables
     string R;
@@ -824,6 +825,244 @@ void Skew() {
     img_in = img_skewed;
 }
 
+// Filter to resize the image
+void resize() {
+    int newWidth, newHeight;
+    int width = img_in.width, height = img_in.height;
+    // Prompt user to enter new dimensions
+    cout << "Enter the new desired dimensions (\"Width Height\"): ";
+    cin >> newWidth >> newHeight;
+
+    // Calculate scaling factors for width
+    int scale1, scale2;
+    scale1 = max(width, newWidth) / min(newWidth, width);
+    scale2 = scale1 + 1;
+
+    // Calculate division of the new image width into two parts
+    int FirstPart = scale2 * min(newWidth, width) - max(width, newWidth);
+    int SecondPart = (max(width, newWidth) - scale1 * FirstPart) / scale2;
+    int StartofSecondpart = SecondPart * scale2;
+
+    // Create a new image with the desired width and original height
+    Image Resized(newWidth, height);
+
+    if (newWidth <= width) {
+        // If the new width is less than or equal to the original width
+        // Create two images representing the first and second parts of the resized image
+        Image FirstImage(FirstPart, height);
+        Image SecondImage(SecondPart, height);
+        int idx, fixed, avrg;
+
+        // For each row in the image
+        for (int j = 0; j < height; j++) {
+            idx = 0;
+            fixed = StartofSecondpart;
+
+            // Process the first part of the resized image
+            for (int h = 0; h < FirstPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+
+                    // Calculate average pixel value for each channel
+                    for (int i = 0; i < scale1; i++) {
+                        avrg += img_in(idx, j, k);
+                        idx++;
+                        if (idx >= width) {
+                            break;
+                        }
+                    }
+                    avrg /= scale1;
+                    // Assign the average pixel value to the corresponding position in the FirstImage
+                    FirstImage(h, j, k) = min(avrg, 255);
+                }
+                fixed += scale1;
+            }
+
+            // Process the second part of the resized image
+            idx = 0;
+            fixed = 0;
+            for (int h = 0; h < SecondPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+                    for (int i = 0; i < scale2; i++) {
+                        avrg += img_in(idx, j, k);
+                        idx++;
+                        if (idx >= width) {
+                            break;
+                        }
+                    }
+                    avrg /= scale2;
+                    // Assign the average pixel value to the corresponding position in the SecondImage
+                    SecondImage(h, j, k) = min(avrg, 255);
+                }
+                fixed += scale2;
+            }
+        }
+
+        // Merge the two parts into the final resized image
+        for (int i = 0; i < Resized.height; i++) {
+            for (int j = 0; j < Resized.width; ++j) {
+                for (int k = 0; k < 3; ++k) {
+                    Resized(j, i, k) = (j >= SecondPart ? FirstImage(j - SecondPart, i, k) : SecondImage(j, i, k));
+                }
+            }
+        }
+    } else {
+        // If the new width is greater than the original width
+        // Process each row and scale the pixels accordingly
+        int idx;
+        for (int j = 0; j < height; j++) {
+            idx = 0;
+            for (int i = 0; i < width; i++) {
+                if (i >= FirstPart) {
+                    // Scale the pixels in the first part
+                    for (int h = 0; h < scale2; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resized(idx, j, k) = img_in(i, j, k);
+                        }
+                        idx++;
+                    }
+                } else {
+                    // Scale the pixels in the second part
+                    for (int h = 0; h < scale1; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resized(idx, j, k) = img_in(i, j, k);
+                        }
+                        idx++;
+                    }
+                }
+            }
+        }
+    }
+
+    // Update the input image to the resized image
+    img_in = Resized;
+    width = img_in.width;
+    height = img_in.height;
+
+    // Calculate scaling factors for height
+    scale1 = max(height, newHeight) / min(newHeight, height);
+    scale2 = scale1 + 1;
+
+    // Calculate division of the new image height into two parts
+    FirstPart = scale2 * min(newHeight, height) - max(height, newHeight);
+    SecondPart = (max(height, newHeight) - scale1 * FirstPart) / scale2;
+    StartofSecondpart = SecondPart * scale2;
+
+    // Create a new image with the resized width and desired height
+    Image Resizedall(width, newHeight);
+
+    if (newHeight <= height) {
+        // If the new height is less than or equal to the original height
+        // Create two images representing the first and second parts of the resized image
+        Image FirstImage(width, FirstPart);
+        Image SecondImage(width, SecondPart);
+        int idx, fixed, avrg;
+
+        // For each column in the image
+        for (int j = 0; j < width; j++) {
+            idx = 0;
+            fixed = StartofSecondpart;
+
+            // Process the first part of the resized image
+            for (int h = 0; h < FirstPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+
+                    // Calculate average pixel value for each channel
+                    for (int i = 0; i < scale1; i++) {
+                        avrg += img_in(j, idx, k);
+                        idx++;
+                        if (idx >= height) {
+                            break;
+                        }
+                    }
+                    avrg /= scale1;
+                    // Assign the average pixel value to the corresponding position in the FirstImage
+                    FirstImage(j, h, k) = min(avrg, 255);
+                }
+                fixed += scale1;
+            }
+
+            // Process the second part of the resized image
+            idx = 0;
+            fixed = 0;
+            for (int h = 0; h < SecondPart; h++) {
+                for (int k = 0; k < 3; ++k) {
+                    avrg = 0;
+                    idx = fixed;
+                    for (int i = 0; i < scale2; i++) {
+                        avrg += img_in(j, idx, k);
+                        idx++;
+                        if (idx >= height) {
+                            break;
+                        }
+                    }
+                    avrg /= scale2;
+                    // Assign the average pixel value to the corresponding position in the SecondImage
+                    SecondImage(j, h, k) = min(avrg, 255);
+                }
+                fixed += scale2;
+            }
+        }
+
+        // Merge the two parts into the final resized image
+        for (int j = 0; j < Resizedall.width; ++j) {
+            for (int i = 0; i < Resizedall.height; i++) {
+                for (int k = 0; k < 3; ++k) {
+                    Resizedall(j, i, k) = (i >= SecondPart ? FirstImage(j, i - SecondPart, k) : SecondImage(j, i, k));
+                }
+            }
+        }
+    } else {
+        // If the new height is greater than the original height
+        // Process each column and scale the pixels accordingly
+        int idx;
+        for (int j = 0; j < width; j++) {
+            idx = 0;
+            for (int i = 0; i < height; i++) {
+                if (i >= FirstPart) {
+                    // Scale the pixels in the first part
+                    for (int h = 0; h < scale2; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resizedall(j, idx, k) = img_in(j, i, k);
+                        }
+                        idx++;
+                    }
+                } else {
+                    // Scale the pixels in the second part
+                    for (int h = 0; h < scale1; h++) {
+                        for (int k = 0; k < 3; ++k) {
+                            Resizedall(j, idx, k) = img_in(j, i, k);
+                        }
+                        idx++;
+                    }
+                }
+            }
+        }
+    }
+
+    // Update the input image to the resized image
+    img_in = Resizedall;
+}
+
+// This function performs a channel swapper.
+void channel_swap() {
+    // Loop through each column of the image
+    for(int i = 0; i < img_in.width; i++) {
+        // Loop through each row of the image
+        for (int j = 0; j < img_in.height; ++j) {
+            // Swap the red channel (index 0) with the blue channel (index 2)
+            swap(img_in(i,j,0), img_in(i,j,2));
+            // Swap the green channel (index 1) with the blue channel (index 2)
+            swap(img_in(i,j,1), img_in(i,j,2));
+        }
+    }
+}
+
 // Function to prompt the user to enter an image name with its extension and load the image
 int insert() {
     while (true) { // Loop until a valid image is loaded
@@ -948,7 +1187,7 @@ int filters_menu() {
         cout << "F) Rotate\n";
         cout << "G) Skew\n";
         cout << "H) Edit Brightness\n";
-        cout << "I) - Resize\n";
+        cout << "I) Resize\n";
         cout << "J) Crop\n";
         cout << "K) Blur\n";
         cout << "L) Pixlate\n";
@@ -959,7 +1198,7 @@ int filters_menu() {
         cout << "Q) Wanno TV\n";
         cout << "R) Infera Red\n";
         cout << "S) Oil Painting\n";
-        cout << "T) - Bouns 2\n";
+        cout << "T) Channel Swap\n";
         cout << "U) Clear All Filters\n";
         cout << "V) Back to Main menu\n";
         cout << "========================\n";
@@ -1021,7 +1260,7 @@ int filters_menu() {
             oil_painted();
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "T") {
-            // bouns2();
+            channel_swap();
         } else if (filterschoice == "U") {
             img_in.loadNewImage(imginput); // Reload the original image to clear all applied filters
             cout << "All filters have been cleared!" << endl;
