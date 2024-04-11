@@ -1037,7 +1037,7 @@ void Skew() {
     double angle;
     string ang;
     while (true) {
-        cout << "Please enter the angle: ";
+        cout << "Please enter the angle (0 - 360): ";
         cin >> ang;
         if (!isNumeric(ang)) {
             cout << "Please enter a proper positive numeric value." << endl;
@@ -1049,11 +1049,11 @@ void Skew() {
             cout << "Please enter a proper value" << endl;
             continue;
         }
-        if (((int)angle % 90) == 0) {
-            cout << "Invalid Angle. 90 and its multiples aren't allowed!" << endl;
+        if (angle == 90.00 || angle == 270.00 ) {
+            cout << "Invalid Angle. 90 and 270 aren't allowed!" << endl;
             continue;
         }
-        if (angle > 5000) {
+        if (angle > 360 || angle  < 0) {
             cout << "Please enter a proper value" << endl;
             continue;
         } else {
