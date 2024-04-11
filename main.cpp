@@ -39,11 +39,14 @@ Image img_in;
 Image img_filter;
 string imginput = "NULL";
 
+// Function to check if a string is numeric
 bool isNumeric(string str) {
     for (int i = 0; i < str.length(); i++) {
+        // Check each character of the string
         if (isdigit(str[i]) == false)
-            return false; //when one non numeric value is found, return false
+            return false; // Return false if a non-numeric character is found
     }
+    // Return true if all characters are numeric
     return true;
 }
 
@@ -338,9 +341,10 @@ void blur() {
     delete[] row;
 }
 
-// Filter to resize the image
+// Function to resize the image
 Image resize(Image img_resize, int newWidth, int newHeight) {
     int width = img_resize.width, height = img_resize.height;
+
     // Calculate scaling factors for width
     int scale1, scale2;
     scale1 = max(width, newWidth) / min(newWidth, width);
@@ -553,14 +557,15 @@ Image resize(Image img_resize, int newWidth, int newHeight) {
         }
     }
 
-    // Update the input image to the resized image
+    // Return the resized image
     return Resizedall;
 }
 
+// Function to handle resizing options for the image
 int resize_menu() {
-    string resizechoice;
-    int newWidth, newHeight;
-    Image img_resize = img_filter;
+    string resizechoice; // Variable to store user's resize menu choice
+    int newWidth, newHeight; // Variables to store new dimensions for the image
+    Image img_resize = img_filter; // Create a copy of the filtered image to work with
     while (true) {
         cout << "\n*** How do you want to Resize your image? ***\n";
         cout << "===========================================\n";
@@ -570,23 +575,24 @@ int resize_menu() {
         cout << "===========================================\n";
         cout << "Enter your choice: ";
         cin >> resizechoice;
-        transform(resizechoice.begin(), resizechoice.end(), resizechoice.begin(), ::toupper);
-        if (resizechoice == "A") {
+        transform(resizechoice.begin(), resizechoice.end(), resizechoice.begin(), ::toupper); // Convert choice to uppercase
+        if (resizechoice == "A") { // If user chooses to resize by dimensions
             cout << "Enter your new desired dimensions(\"Width Height\"): ";
-            cin >> newWidth >> newHeight;
-            img_filter = resize(img_filter, newWidth, newHeight);
+            cin >> newWidth >> newHeight; // Read new dimensions from user input
+            img_filter = resize(img_filter, newWidth, newHeight); // Resize the image
             cout << "Operation completed successfully!" << endl;
             return 0;
-        } else if (resizechoice == "B") {
-            double scalew, scaleh;
+        } else if (resizechoice == "B") { // If user chooses to resize by scale
+            double scalew, scaleh; // Variables to store scaling factors
             cout << "Enter your desired scale for each dimension(\"ScaleWidth ScaleHeight\"): ";
-            cin >> scalew >> scaleh;
+            cin >> scalew >> scaleh; // Read scaling factors from user input
+            // Calculate new dimensions based on the scaling factors
             newWidth = (double)(img_resize.width * scalew);
             newHeight = (double)(img_resize.height * scaleh);
-            img_filter = resize(img_filter, newWidth, newHeight);
+            img_filter = resize(img_filter, newWidth, newHeight); // Resize the image
             cout << "Operation completed successfully!" << endl;
             return 0;
-        } else if (resizechoice == "C") {
+        } else if (resizechoice == "C") { // If user chooses to go back to filters menu
             return 0;
         } else {
             cout << "Please enter a valid choice" << endl;
@@ -610,36 +616,39 @@ void merge_images(Image img_first, Image img_second) {
     img_filter = img_merged;
 }
 
+// Function to handle the merging of images and provide options for the user
 int merge_images_menu() {
-    string mergechoice;
-    Image img_one, img_two;
-    int max_width, max_hight, min_width, min_hight;
-    img_one = img_filter;
+    string mergechoice; // Variable to store user's merge menu choice
+    Image img_one, img_two; // Variables to store the two images to be merged
+    int max_width, max_height, min_width, min_height; // Variables to store dimensions of the images
+    img_one = img_filter; // Set the first image to the filtered image
     while (true) {
         cout << "\n**what do you like to enter?**" << endl;
         cout << "==============================" << endl;
-        cout << "A) Resize to the smallest dimention" << endl;
-        cout << "B) Resize to the gratest dimention" << endl;
-        cout << "C) merge common area" << endl;
+        // Display merge options
+        cout << "A) Resize to the smallest dimension" << endl;
+        cout << "B) Resize to the greatest dimension" << endl;
+        cout << "C) Merge common area" << endl;
         cout << "D) Back to filters menu" << endl;
         cout << "==============================" << endl;
         cout << "Enter your choice: ";
         cin >> mergechoice;
-        transform(mergechoice.begin(), mergechoice.end(), mergechoice.begin(), ::toupper);
-        if (mergechoice != "D") {
-            string second_image; // Variable to store the name of the second image
+        transform(mergechoice.begin(), mergechoice.end(), mergechoice.begin(), ::toupper); // Convert choice to uppercase
+        if (mergechoice != "D") { // If the user didn't choose to go back to filters menu
+            string secinputimage; // Variable to store the name of the second image
             // Loop until a valid second image is loaded
             while (true) {
                 cout << "Please enter second image name with its extension: ";
-                cin >> second_image;
+                cin >> secinputimage;
                 try {
-                    img_two.loadNewImage(second_image); // Attempt to load the second image
+                    img_two.loadNewImage(secinputimage); // Attempt to load the second image
                     break;
                 } catch (invalid_argument) {
                     continue;
                 }
             }
         }
+        // Determine the maximum and minimum dimensions of the two images
         if (img_one.width > img_two.width) {
             max_width = img_one.width;
             min_width = img_two.width;
@@ -648,30 +657,31 @@ int merge_images_menu() {
             min_width = img_one.width;
         }
         if (img_one.height > img_two.height) {
-            max_hight = img_one.height;
-            min_hight = img_two.height;
+            max_height = img_one.height;
+            min_height = img_two.height;
         } else {
-            max_hight = img_two.height;
-            min_hight = img_one.height;
+            max_height = img_two.height;
+            min_height = img_one.height;
         }
+        // Process user's merge choice
         if (mergechoice == "A") {
-            img_one = resize(img_one, min_width, min_hight);
-            img_two = resize(img_two, min_width, min_hight);
-            merge_images(img_one, img_two);
+            img_one = resize(img_one, min_width, min_height); // Resize the first image to the smallest dimensions
+            img_two = resize(img_two, min_width, min_height); // Resize the second image to the smallest dimensions
+            merge_images(img_one, img_two); // Merge the images
             cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (mergechoice == "B") {
-            img_one = resize(img_one, max_width, max_hight);
-            img_two = resize(img_two, max_width, max_hight);
-            merge_images(img_one, img_two);
+            img_one = resize(img_one, max_width, max_height); // Resize the first image to the greatest dimensions
+            img_two = resize(img_two, max_width, max_height); // Resize the second image to the greatest dimensions
+            merge_images(img_one, img_two); // Merge the images
             cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (mergechoice == "C") {
-            merge_images(img_one, img_two);
+            merge_images(img_one, img_two); // Merge the images without resizing
             cout << "Operation completed successfully!" << endl;
             return 0;
         } else if (mergechoice == "D") {
-            return 0;
+            return 0; // Return to the filters menu
         } else {
             cout << "Please enter a valid choice" << endl;
         }
@@ -922,7 +932,7 @@ void oil_painted() {
     img_filter = img_oil_paint;
 }
 
-void normframe() {
+void normal_frame() {
     // Prompt user for frame thickness and desired RGB values
     int x, r, g, b;
     cout << "Enter frame thickness: ";
@@ -952,7 +962,7 @@ void normframe() {
     img_filter = framed;
 }
 
-void fanframe() {
+void fancy_frame() {
     // Prompt user for frame thickness and desired RGB values for both frames
     int x, r1, g1, b1, r2, g2, b2;
     cout << "Enter frame Thickness: ";
@@ -1008,10 +1018,10 @@ int frame() {
         transform(framechoice.begin(), framechoice.end(), framechoice.begin(), ::toupper);
         // Process user's frame choice
         if (framechoice == "A") {
-            normframe();
+            normal_frame();
             return 0;
         } else if (framechoice == "B") {
-            fanframe();
+            fancy_frame();
             return 0;
         } else if (framechoice == "C") {
             return 0;
@@ -1105,7 +1115,7 @@ int insert() {
             continue;
         }
     }
-    img_filter = img_in;
+    img_filter = img_in; // Set the filter image to the loaded image
     return 0;
 }
 
@@ -1129,9 +1139,9 @@ int save(Image img_save) {
                 try {
                     cout << "\nPlease enter image name with its extension: ";
                     cin >> outimg;
-                    img_save.saveImage(outimg);
+                    img_save.saveImage(outimg); // Save the image with the provided name
                     break;
-                } catch (invalid_argument) {
+                } catch (invalid_argument) { // Catch exception if saving fails
                     continue;
                 }
             }
@@ -1140,9 +1150,9 @@ int save(Image img_save) {
         } else if (savechoice == "B") {
             while (true) {
                 try {
-                    img_save.saveImage(imginput);
+                    img_save.saveImage(imginput); // Replace the existing image with the same name
                     break;
-                } catch (invalid_argument) {
+                } catch (invalid_argument) { // Catch exception if saving fails
                     continue;
                 }
             }
