@@ -2,31 +2,15 @@
 //  File: CS112_A3_Part1_S3_20230309_S4_20230381_20230554.cpp
 //  Purpose: Baby Photoshop for Image Processing
 //  Flow map link: https://drive.google.com/file/d/1efY7Dc3V8tU-0ygiAyMTlVMV-9hApo94/view?usp=sharing
-//  *********************************************************************************Authors*********************************************************************************
-//  Mazen nasser >> Group A >> S3 >> 20230309 >> mazen.nasser143@gmail.com >> greyscale, merge
-//  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >> black and white, Flip, Crop, infera red, menus, error handling
-//  Mohamed tarek >> Group A >> S4 >> 20230554 >> mohamedtarik06@gmail.com >> Invert, rotate
-//  ********************************************************************************End Authors******************************************************************************
+//  ****************************************************************************************Authors****************************************************************************************
+//  Mazen nasser >> Group A >> S3 >> 20230309 >> mazen.nasser143@gmail.com >> greyscale, merge, Edit Brightness, Detect image edges, Channel Swap
+//  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >> black and white, Flip, Crop, infera red, wano TV-DAY-NIGHT, Skew, menus, saving system, error handling
+//  Mohamed tarek >> Group A >> S4 >> 20230554 >> mohamedtarik06@gmail.com >> Invert, rotate, resize, blur, pixelate, frames, Oil Painting
+//  ***************************************************************************************End Authors*************************************************************************************
 //  TA: Ahmed Fouad
 //  Version: 2.0
-//  Last Modification Date: 11/04/2024
-//  =============================================================================================================================================================================   //
-/*
-                                                                \\ Version 1 Notes //
-    - "Image_Class.h" V1.0
-    - The program can handle only two images at a time and they should be in the same directory as the executable file or absolute path to them.
-    - Merging Function works on partial crop of the top right corner image with dimentions of the smaller image (will be fixed in V2-Part 2 inshaalah after making resize).
-    - Merging two images and rotating images are saved directly (will be fixed in the next version inshaalah with "temp file creation" saving system).
-    - The program can handle images with different sizes (width and height).
-    - The program stays at filters menu in case you want to apply more than one filter Notice that you can't apply more than one filter on rotated or merged images (until now).
-*/
-//  =============================================================================================================================================================================   //
-/*
-                                                                \\ Version 1.1 Notes //
-    - "Image_Class.h" V2.0
-    -  V1.0 issues fixed by due to the updated library.
-*/
-//  =============================================================================================================================================================================   //
+//  Last Modification Date: 12/04/2024
+//  =================================================================================================================================================================================   //
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -1002,14 +986,14 @@ void fancy_frame() {
     img_filter = framed;
 }
 
-void frame_blur(){
+void frame_blur() {
     Image blr(img_filter);
     blur();
     int thck;
-    cout<<"Enter frame thickness: ";
-    cin>>thck;
+    cout << "Enter frame thickness: ";
+    cin >> thck;
     int w = img_filter.width, h = img_filter.height;
-    img_filter = resize(img_filter,2*thck + w, 2*thck + h);
+    img_filter = resize(img_filter, 2 * thck + w, 2 * thck + h);
     for (int i = thck; i < thck + blr.width; i++) {
         for (int j = thck; j < thck + blr.height; j++) {
             for (int k = 0; k < 3; k++) {
@@ -1038,19 +1022,15 @@ void frame() {
         if (framechoice == "A") {
             normal_frame();
             return;
-        }
-        else if (framechoice == "B") {
+        } else if (framechoice == "B") {
             fancy_frame();
             return;
-        }
-        else if (framechoice == "C"){
+        } else if (framechoice == "C") {
             frame_blur();
             return;
-        }
-        else if (framechoice == "D") {
+        } else if (framechoice == "D") {
             return;
-        }
-        else {
+        } else {
             cout << "Please enter a valid choice" << endl;
         }
     }
@@ -1074,11 +1054,11 @@ void Skew() {
             cout << "Please enter a proper value" << endl;
             continue;
         }
-        if (angle == 90.00 || angle == 270.00 ) {
+        if (angle == 90.00 || angle == 270.00) {
             cout << "Invalid Angle. 90 and 270 aren't allowed!" << endl;
             continue;
         }
-        if (angle > 360 || angle  < 0) {
+        if (angle > 360 || angle < 0) {
             cout << "Please enter a proper value" << endl;
             continue;
         } else {
