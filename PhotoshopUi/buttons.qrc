@@ -1,0 +1,88 @@
+<RCC>
+    <qresource prefix="/">
+        <file>buttons/hover/Back_hover.png</file>
+        <file>buttons/hover/Black and white_hover.png</file>
+        <file>buttons/hover/blur_hover.png</file>
+        <file>buttons/hover/brightness_hover.png</file>
+        <file>buttons/hover/Cancel_hover.png</file>
+        <file>buttons/hover/clear_hover.png</file>
+        <file>buttons/hover/color swap_hover.png</file>
+        <file>buttons/hover/crop_hover.png</file>
+        <file>buttons/hover/detect edge_hover.png</file>
+        <file>buttons/hover/flip h_hover.png</file>
+        <file>buttons/hover/flip v_hover.png</file>
+        <file>buttons/hover/Forward_hover.png</file>
+        <file>buttons/hover/frame_hover.png</file>
+        <file>buttons/hover/grey scale_hover.png</file>
+        <file>buttons/hover/infera red_hover.png</file>
+        <file>buttons/hover/insert_hover.png</file>
+        <file>buttons/hover/invert colors_hover.png</file>
+        <file>buttons/hover/Merge_hover.png</file>
+        <file>buttons/hover/oil paint_hover.png</file>
+        <file>buttons/hover/OK_hover.png</file>
+        <file>buttons/hover/pixelate_hover.png</file>
+        <file>buttons/hover/resize_hover.png</file>
+        <file>buttons/hover/rotate_hover.png</file>
+        <file>buttons/hover/save_hover.png</file>
+        <file>buttons/hover/skew_hover.png</file>
+        <file>buttons/hover/wano day_hover.png</file>
+        <file>buttons/hover/wano night_hover.png</file>
+        <file>buttons/hover/wano tv_hover.png</file>
+        <file>buttons/normal/Back.png</file>
+        <file>buttons/normal/Black and white.png</file>
+        <file>buttons/normal/blur.png</file>
+        <file>buttons/normal/brightness.png</file>
+        <file>buttons/normal/Cancel.png</file>
+        <file>buttons/normal/clear.png</file>
+        <file>buttons/normal/color swap.png</file>
+        <file>buttons/normal/crop.png</file>
+        <file>buttons/normal/detect edge.png</file>
+        <file>buttons/normal/flip h.png</file>
+        <file>buttons/normal/flip v.png</file>
+        <file>buttons/normal/Forward.png</file>
+        <file>buttons/normal/frame.png</file>
+        <file>buttons/normal/grey scale.png</file>
+        <file>buttons/normal/infera red.png</file>
+        <file>buttons/normal/insert.png</file>
+        <file>buttons/normal/invert colors.png</file>
+        <file>buttons/normal/Merge.png</file>
+        <file>buttons/normal/oil paint.png</file>
+        <file>buttons/normal/OK.png</file>
+        <file>buttons/normal/pixelate.png</file>
+        <file>buttons/normal/resize.png</file>
+        <file>buttons/normal/rotate.png</file>
+        <file>buttons/normal/save.png</file>
+        <file>buttons/normal/skew.png</file>
+        <file>buttons/normal/wano day.png</file>
+        <file>buttons/normal/wano night.png</file>
+        <file>buttons/normal/wano tv.png</file>
+        <file>buttons/pressed/Back_pressed.png</file>
+        <file>buttons/pressed/Black and white_pressed.png</file>
+        <file>buttons/pressed/blur_pressed.png</file>
+        <file>buttons/pressed/brightness_pressed.png</file>
+        <file>buttons/pressed/Cancel_pressed.png</file>
+        <file>buttons/pressed/clear_pressed.png</file>
+        <file>buttons/pressed/color swap_pressed.png</file>
+        <file>buttons/pressed/crop_pressed.png</file>
+        <file>buttons/pressed/detect edge_pressed.png</file>
+        <file>buttons/pressed/flip h_pressed.png</file>
+        <file>buttons/pressed/flip v_pressed.png</file>
+        <file>buttons/pressed/Forward_pressed.png</file>
+        <file>buttons/pressed/frame_pressed.png</file>
+        <file>buttons/pressed/grey scale_pressed.png</file>
+        <file>buttons/pressed/infera red_pressed.png</file>
+        <file>buttons/pressed/insert_pressed.png</file>
+        <file>buttons/pressed/invert colors_pressed.png</file>
+        <file>buttons/pressed/Merge_pressed.png</file>
+        <file>buttons/pressed/oil paint_pressed.png</file>
+        <file>buttons/pressed/OK_pressed.png</file>
+        <file>buttons/pressed/pixelate_pressed.png</file>
+        <file>buttons/pressed/resize_pressed.png</file>
+        <file>buttons/pressed/rotate_pressed.png</file>
+        <file>buttons/pressed/save_pressed.png</file>
+        <file>buttons/pressed/skew_pressed.png</file>
+        <file>buttons/pressed/wano day_pressed.png</file>
+        <file>buttons/pressed/wano night_pressed.png</file>
+        <file>buttons/pressed/wano tv_pressed.png</file>
+    </qresource>
+</RCC>
