@@ -1,7 +1,8 @@
 //  FCAI – Structured Programming – 2024 - Assignment 3
 //  File: CS112_A3_Part1_S3_20230309_S4_20230381_20230554.cpp
 //  Purpose: Baby Photoshop for Image Processing
-//  Flow map link: https://drive.google.com/file/d/1efY7Dc3V8tU-0ygiAyMTlVMV-9hApo94/view?usp=sharing
+//  app map link: https://drive.google.com/file/d/1efY7Dc3V8tU-0ygiAyMTlVMV-9hApo94/view?usp=sharing
+//  Github Repo: https://github.com/mohamedtarikz/Assignment-3-Little-photoshop-
 //  ****************************************************************************************Authors****************************************************************************************
 //  Mazen nasser >> Group A >> S3 >> 20230309 >> mazen.nasser143@gmail.com >> greyscale, merge, Edit Brightness, Detect image edges, Channel Swap
 //  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >> black and white, Flip, Crop, infera red, wano TV-DAY-NIGHT, Skew, menus, saving system, error handling
@@ -9,7 +10,7 @@
 //  ***************************************************************************************End Authors*************************************************************************************
 //  TA: Ahmed Fouad
 //  Version: 2.0
-//  Last Modification Date: 12/04/2024
+//  Last Modification Date: 17/04/2024
 //  =================================================================================================================================================================================   //
 #include <iostream>
 #include <algorithm>
@@ -22,6 +23,7 @@ using namespace std;
 Image img_in;
 Image img_filter;
 string imginput = "NULL";
+string saveindicator = "N";
 
 // Function to check if a string is numeric
 bool isNumeric(string str) {
@@ -78,6 +80,8 @@ void crop_image() {
     int x, y, w, h;
     // Continue prompting for input until valid values are provided
     while (true) {
+        cout << "\ncurrent possetion is: ( 0 , 0 )" << endl;
+        cout << "current Image Size is: " << img_filter.width << " X " << img_filter.height << endl;
         // Prompt user to enter starting X coordinate
         cout << "Enter starting X coordinate: ";
         cin >> X;
@@ -167,6 +171,7 @@ int edit_brightness() {
             }
         }
     }
+    saveindicator = "N";
     cout << "Operation completed successfully!" << endl;
     return 0;
 }
@@ -540,44 +545,63 @@ Image resize(Image img_resize, int newWidth, int newHeight) {
             }
         }
     }
-
     // Return the resized image
     return Resizedall;
 }
 
 // Function to handle resizing options for the image
-int resize_menu() {
+void resize_menu() {
     string resizechoice; // Variable to store user's resize menu choice
     int newWidth, newHeight; // Variables to store new dimensions for the image
     Image img_resize = img_filter; // Create a copy of the filtered image to work with
     while (true) {
         cout << "\n*** How do you want to Resize your image? ***\n";
-        cout << "===========================================\n";
+        cout << "==============================================\n";
         cout << "A) Resize by dimensions\n";
         cout << "B) Resize by scale\n";
         cout << "C) Back to filters menu\n";
-        cout << "===========================================\n";
+        cout << "==============================================\n";
         cout << "Enter your choice: ";
         cin >> resizechoice;
         transform(resizechoice.begin(), resizechoice.end(), resizechoice.begin(), ::toupper); // Convert choice to uppercase
         if (resizechoice == "A") { // If user chooses to resize by dimensions
-            cout << "Enter your new desired dimensions(\"Width Height\"): ";
-            cin >> newWidth >> newHeight; // Read new dimensions from user input
+            while (true) {
+                cout << "Enter your new desired dimensions(\"Width Height\"): ";
+                cin >> newWidth >> newHeight; // Read new dimensions from user input
+                if (newWidth <= 0 || newHeight <= 0) {
+                    cout << "Please enter a width and hight grater than 0" << endl;
+                    continue;
+                }
+            }
             img_filter = resize(img_filter, newWidth, newHeight); // Resize the image
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
-            return 0;
+            return;
         } else if (resizechoice == "B") { // If user chooses to resize by scale
             double scalew, scaleh; // Variables to store scaling factors
-            cout << "Enter your desired scale for each dimension(\"ScaleWidth ScaleHeight\"): ";
-            cin >> scalew >> scaleh; // Read scaling factors from user input
+            while (true) {
+                cout << "Enter your desired scale for each dimension(\"ScaleWidth ScaleHeight\"): ";
+                cin >> scalew >> scaleh; // Read scaling factors from user input
+                if (scalew <= 0 || scaleh <= 0) {
+                    cout << "Please enter a scale grater than 0" << endl;
+                    continue;
+                }
+                if (scalew > 10 || scaleh > 10) {
+                    cout << "Please enter a scale less than 10" << endl;
+                    continue;
+                } else {
+                    break;
+                }
+            }
             // Calculate new dimensions based on the scaling factors
             newWidth = (double)(img_resize.width * scalew);
             newHeight = (double)(img_resize.height * scaleh);
             img_filter = resize(img_filter, newWidth, newHeight); // Resize the image
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
-            return 0;
+            return;
         } else if (resizechoice == "C") { // If user chooses to go back to filters menu
-            return 0;
+            return;
         } else {
             cout << "Please enter a valid choice" << endl;
         }
@@ -601,7 +625,7 @@ void merge_images(Image img_first, Image img_second) {
 }
 
 // Function to handle the merging of images and provide options for the user
-int merge_images_menu() {
+void merge_images_menu() {
     string mergechoice; // Variable to store user's merge menu choice
     Image img_one, img_two; // Variables to store the two images to be merged
     int max_width, max_height, min_width, min_height; // Variables to store dimensions of the images
@@ -609,7 +633,6 @@ int merge_images_menu() {
     while (true) {
         cout << "\n**what do you like to enter?**" << endl;
         cout << "==============================" << endl;
-        // Display merge options
         cout << "A) Resize to the smallest dimension" << endl;
         cout << "B) Resize to the greatest dimension" << endl;
         cout << "C) Merge common area" << endl;
@@ -652,20 +675,23 @@ int merge_images_menu() {
             img_one = resize(img_one, min_width, min_height); // Resize the first image to the smallest dimensions
             img_two = resize(img_two, min_width, min_height); // Resize the second image to the smallest dimensions
             merge_images(img_one, img_two); // Merge the images
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
-            return 0;
+            return;
         } else if (mergechoice == "B") {
             img_one = resize(img_one, max_width, max_height); // Resize the first image to the greatest dimensions
             img_two = resize(img_two, max_width, max_height); // Resize the second image to the greatest dimensions
             merge_images(img_one, img_two); // Merge the images
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
-            return 0;
+            return;
         } else if (mergechoice == "C") {
             merge_images(img_one, img_two); // Merge the images without resizing
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
-            return 0;
+            return;
         } else if (mergechoice == "D") {
-            return 0; // Return to the filters menu
+            return; // Return to the filters menu
         } else {
             cout << "Please enter a valid choice" << endl;
         }
@@ -705,7 +731,7 @@ void flip_vertically() {
 }
 
 // flipping an image using user choice of direction menu
-int flip_image_menu() {
+void flip_image_menu() {
     string flipchoice;
     while (true) {
         cout << "\n*** How do you want to flip your image? ***\n";
@@ -720,19 +746,22 @@ int flip_image_menu() {
         transform(flipchoice.begin(), flipchoice.end(), flipchoice.begin(), ::toupper);
         if (flipchoice == "A") {
             flip_horizontally();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
-            return 0;
+            return;
         } else if (flipchoice == "B") {
             flip_vertically();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
-            return 0;
+            return;
         } else if (flipchoice == "C") {
             flip_horizontally();
             flip_vertically();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
-            return 0;
+            return;
         } else if (flipchoice == "D") {
-            return 0;
+            return;
         } else {
             cout << "Please enter a valid choice" << endl;
         }
@@ -777,17 +806,23 @@ void rotate_image_menu() {
             // Rotate the image 90 degrees clockwise
             flip_vertically();
             rotate_image_90deg();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
+            return;
         } else if (flipchoice == "B") {
             // Rotate the image 180 degrees
             flip_horizontally();
             flip_vertically();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
+            return;
         } else if (flipchoice == "C") {
             // Rotate the image 270 degrees clockwise
             flip_horizontally();
             rotate_image_90deg();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
+            return;
         } else if (flipchoice == "D") {
             return;
         } else {
@@ -869,8 +904,23 @@ void infera_red() {
 void pixelate() {
     // Prompt user for pixelation radius
     int r;
-    cout << "Enter radius of pixelation (the more the stronger the effect) (0 - 10): ";
-    cin >> r;
+    string R;
+    while (true) {
+        cout << "Enter radius of pixelation (the more the stronger the effect) (0 - 10): ";
+        cin >> R;
+        if (!isNumeric(R)){
+            cout << "Invalid radius. Please enter a value between 0 and 10" << endl;
+            continue;
+        }
+        r = stoi(R);
+        if (r < 0 && r > 10) {
+            cout << "Invalid radius. Please enter a value between 0 and 10";
+            continue;
+        }
+        else {
+            break;
+        }
+    }
     // Create a new image to store the pixelated result
     Image pixels(img_filter.width, img_filter.height);
     // Iterate through the image pixels with step size of r
@@ -1021,12 +1071,18 @@ void frame() {
         // Process user's frame choice
         if (framechoice == "A") {
             normal_frame();
+            saveindicator = "N";
+            cout << "Operation completed successfully!" << endl;
             return;
         } else if (framechoice == "B") {
             fancy_frame();
+            saveindicator = "N";
+            cout << "Operation completed successfully!" << endl;
             return;
         } else if (framechoice == "C") {
             frame_blur();
+            saveindicator = "N";
+            cout << "Operation completed successfully!" << endl;
             return;
         } else if (framechoice == "D") {
             return;
@@ -1054,7 +1110,7 @@ void Skew() {
             cout << "Please enter a proper value" << endl;
             continue;
         }
-        if (angle == 90.00 || angle == 270.00) {
+        if (angle == 90.00) {
             cout << "Invalid Angle. 90 and 270 aren't allowed!" << endl;
             continue;
         }
@@ -1068,7 +1124,7 @@ void Skew() {
     // Calculate the width expansion due to skewing
     int w = ceil((img_filter.height) * tan(angle * M_PI / 180.0));
     // Create a new image for the skewed result
-    Image img_skewed(img_filter.width + w, img_filter.height);
+    Image img_skewed(img_filter.width + abs(w), img_filter.height);
     // Fill the new image with white color
     for (int i = 0; i < img_skewed.width; i++) {
         for (int j = 0; j < img_skewed.height; j++) {
@@ -1079,16 +1135,30 @@ void Skew() {
     }
     // Skew the original image and copy it to the new image
     int c = 0;
-    for (int i = w; i < img_skewed.width; i++) { // Iterate through the columns of the skewed image, starting from the width expansion due to skewing (w)
-        for (int j = 0; j < img_filter.height; j++) {
-            for (int k = 0; k < 3; k++) {
-                // Copy the pixel value from the original image to the skewed image, applying the horizontal offset (c) to the column index (i)
-                img_skewed(i - c, j, k) = img_filter(i - w, j, k);
+    if ((angle > 90.00 && angle < 180.00) || (angle > 270.00 && angle < 360.00)) {
+        for (int i = 0; i < img_filter.width; i++) {
+            for (int j = 0; j < img_filter.height; j++) {
+                for (int k = 0; k < 3; k++) {
+                    // Copy the pixel value from the original image to the skewed image, applying the horizontal offset (c) to the column index (i)
+                    img_skewed(i - c, j, k) = img_filter(i, j, k);
+                }
+                // Calculate the horizontal offset (c) for each row in the skewed image based on the skew angle and current row index (j)
+                c = ceil(j * tan(angle * M_PI / 180.0));
             }
-            // Calculate the horizontal offset (c) for each row in the skewed image based on the skew angle and current row index (j)
-            c = ceil(j * tan(angle * M_PI / 180.0));
+            c = 0;
         }
-        c = 0;
+    } else {
+        for (int i = w; i < img_skewed.width; i++) { // Iterate through the columns of the skewed image, starting from the width expansion due to skewing (w)
+            for (int j = 0; j < img_filter.height; j++) {
+                for (int k = 0; k < 3; k++) {
+                    // Copy the pixel value from the original image to the skewed image, applying the horizontal offset (c) to the column index (i)
+                    img_skewed(i - c, j, k) = img_filter(i - w, j, k);
+                }
+                // Calculate the horizontal offset (c) for each row in the skewed image based on the skew angle and current row index (j)
+                c = ceil(j * tan(angle * M_PI / 180.0));
+            }
+            c = 0;
+        }
     }
     // Update the input image with the skewed result
     img_filter = img_skewed;
@@ -1132,7 +1202,7 @@ int save(Image img_save) {
         cout << "===========================================\n";
         cout << "A) Save as a new image\n";
         cout << "B) Replace the existing image\n";
-        cout << "C) Back to the Main menu\n";
+        cout << "C) Exit this menu\n";
         cout << "===========================================\n";
         cout << "Enter your choice: ";
         cin >> savechoice;
@@ -1199,18 +1269,23 @@ int filters_menu() {
         cout << "T) Channel Swap\n";
         cout << "U) Clear All Filters\n";
         cout << "V) Back to Main menu\n";
+        cout << "W) Save image\n";
+        cout << "X) Exit\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
         transform(filterschoice.begin(), filterschoice.end(), filterschoice.begin(), ::toupper); // Convert filter choice to uppercase
         if (filterschoice == "A") {
             greyscale();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "B") {
             black_and_white();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "C") {
             invert_image();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "D") {
             merge_images_menu();
@@ -1220,6 +1295,7 @@ int filters_menu() {
             rotate_image_menu();
         } else if (filterschoice == "G") {
             Skew();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "H") {
             edit_brightness();
@@ -1227,41 +1303,89 @@ int filters_menu() {
             resize_menu();
         } else if (filterschoice == "J") {
             crop_image();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "K") {
             blur();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "L") {
             pixelate();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "M") {
             detect_edge();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "N") {
             frame();
-            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "O") {
             Wanno_Day();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "P") {
             Wanno_Night();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "Q") {
             Wanno_TV();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "R") {
             infera_red();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "S") {
             oil_painted();
+            saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "T") {
             channel_swap();
+            saveindicator = "N";
+            cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "U") {
-            img_filter = img_in;
-            cout << "All filters have been cleared!" << endl;
+            while (true) {
+                string clear_choice;
+                cout << "are you sure that you want to clear all filters? ( Y / N ): ";
+                cin >> clear_choice;
+                transform(clear_choice.begin(), clear_choice.end(), clear_choice.begin(), ::toupper);
+                if (clear_choice == "Y") {
+                    img_filter = img_in;
+                    saveindicator = "N";
+                    cout << "All filters have been cleared!" << endl;
+                    break;
+                } else if (clear_choice == "N") {
+                    break;
+                } else {
+                    cout << "Please enter a valid choice" << endl;
+                    continue;
+                }
+            }
         } else if (filterschoice == "V") {
-            return 0;
+            return 1;
+        } else if (filterschoice == "W") {
+            save(img_filter);
+            saveindicator = "Y";
+        } else if (filterschoice == "X") {
+            string exit_choice;
+            if (saveindicator == "N") {
+                while (true) {
+                    cout << "Do you want to save current image before exiting? (Y / N): ";
+                    cin >> exit_choice; // Read user's main menu choice
+                    transform(exit_choice.begin(), exit_choice.end(), exit_choice.begin(), ::toupper); // Convert main menu choice to uppercase
+                    if (exit_choice == "Y") {
+                        save(img_filter);
+                        return 0;
+                    } else if (exit_choice == "N") {
+                        return 0;
+                    } else {
+                        cout << "Please enter a valid choice" << endl;
+                        continue;
+                    }
+                }
+            } else if (saveindicator == "Y") {
+                return 0;
+            }
         } else {
             cout << "Please enter a valid choice" << endl;
         }
@@ -1286,13 +1410,16 @@ int main() {
         // Process user's main menu choice
         if (choice == "A") {
             insert();
+            saveindicator = "N";
             cout << "Image Inserted!" << endl;
         } else if (choice == "B") {
             if (imginput == "NULL") {
                 cout << "Please insert an image first! Use option A." << endl;
                 continue;
             } else {
-                filters_menu();
+                if (filters_menu() == 0) {
+                    return 0;
+                }
             }
         } else if (choice == "C") {
             if (imginput == "NULL") {
@@ -1300,9 +1427,30 @@ int main() {
                 continue;
             } else {
                 save(img_filter);
+                saveindicator = "Y";
             }
         } else if (choice == "D") {
-            return 0;
+            string exit_choice;
+            if (imginput == "NULL") {
+                return 0;
+            } else if (saveindicator == "N") {
+                while (true) {
+                    cout << "Do you want to save current image before exiting? (Y / N): ";
+                    cin >> exit_choice; // Read user's main menu choice
+                    transform(exit_choice.begin(), exit_choice.end(), exit_choice.begin(), ::toupper); // Convert main menu choice to uppercase
+                    if (exit_choice == "Y") {
+                        save(img_filter);
+                        return 0;
+                    } else if (exit_choice == "N") {
+                        return 0;
+                    } else {
+                        cout << "Please enter a valid choice" << endl;
+                        continue;
+                    }
+                }
+            } else if (saveindicator == "Y") {
+                return 0;
+            }
         } else {
             cout << "Please enter a valid choice" << endl;
         }
