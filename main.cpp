@@ -4,9 +4,9 @@
 //  app map link: https://drive.google.com/file/d/1efY7Dc3V8tU-0ygiAyMTlVMV-9hApo94/view?usp=sharing
 //  Github Repo: https://github.com/mohamedtarikz/Assignment-3-Little-photoshop-
 //  ****************************************************************************************Authors****************************************************************************************
-//  Mazen nasser >> Group A >> S3 >> 20230309 >> mazen.nasser143@gmail.com >> greyscale, merge, Edit Brightness, Detect image edges, Channel Swap
-//  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >> black and white, Flip, Crop, infera red, wano TV-DAY-NIGHT, Skew, menus, saving system, error handling
-//  Mohamed tarek >> Group A >> S4 >> 20230554 >> mohamedtarik06@gmail.com >> Invert, rotate, resize, blur, pixelate, frames, Oil Painting
+//  Mazen nasser >> Group A >> S3 >> 20230309 >> mazen.nasser143@gmail.com >> greyscale, merge, Edit Brightness, Detect image edges, Channel Swap, Wano Day.
+//  Marwan Hussein Galal >> Group A >> S4 >> 20230381 >> marwanhussein@gmail.com >> black and white, Flip, Crop, infera red, wano TV-NIGHT, Skew, menus, saving system, error handling.
+//  Mohamed tarek >> Group A >> S4 >> 20230554 >> mohamedtarik06@gmail.com >> Invert, rotate, resize, blur, pixelate, frames, Oil Painting.
 //  ***************************************************************************************End Authors*************************************************************************************
 //  TA: Ahmed Fouad
 //  Version: 2.0
@@ -18,6 +18,7 @@
 #include <cmath>
 #include <random>
 #include "library/Image_Class.h"
+#include "library\encryption-decryption.h"
 
 using namespace std;
 Image img_in;
@@ -1110,7 +1111,7 @@ void Skew() {
             cout << "Please enter a proper value" << endl;
             continue;
         }
-        if (angle == 90.00) {
+        if (angle == 90.00 || angle == 270) {
             cout << "Invalid Angle. 90 and 270 aren't allowed!" << endl;
             continue;
         }
@@ -1267,10 +1268,12 @@ int filters_menu() {
         cout << "R) Infera Red\n";
         cout << "S) Oil Painting\n";
         cout << "T) Channel Swap\n";
-        cout << "U) Clear All Filters\n";
-        cout << "V) Back to Main menu\n";
-        cout << "W) Save image\n";
-        cout << "X) Exit\n";
+        cout << "U) Encrypt\n";
+        cout << "V) Decrypt\n";
+        cout << "W) Clear All Filters\n";
+        cout << "X) Back to Main menu\n";
+        cout << "Y) Save image\n";
+        cout << "Z) Exit\n";
         cout << "========================\n";
         cout << "Enter your choice: ";
         cin >> filterschoice; // Read user's filter choice
@@ -1344,6 +1347,14 @@ int filters_menu() {
             saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "U") {
+            encrypt_image();
+            saveindicator = "N";
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "V") {
+            decrypt_image();
+            saveindicator = "N";
+            cout << "Operation completed successfully!" << endl;
+        } else if (filterschoice == "W") {
             while (true) {
                 string clear_choice;
                 cout << "are you sure that you want to clear all filters? ( Y / N ): ";
@@ -1361,12 +1372,12 @@ int filters_menu() {
                     continue;
                 }
             }
-        } else if (filterschoice == "V") {
+        } else if (filterschoice == "X") {
             return 1;
-        } else if (filterschoice == "W") {
+        } else if (filterschoice == "Y") {
             save(img_filter);
             saveindicator = "Y";
-        } else if (filterschoice == "X") {
+        } else if (filterschoice == "Z") {
             string exit_choice;
             if (saveindicator == "N") {
                 while (true) {
