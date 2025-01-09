@@ -1347,11 +1347,11 @@ int filters_menu() {
             saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "U") {
-            encrypt_image();
+            encrypt_image(img_filter);
             saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "V") {
-            decrypt_image();
+            decrypt_image(img_filter);
             saveindicator = "N";
             cout << "Operation completed successfully!" << endl;
         } else if (filterschoice == "W") {
