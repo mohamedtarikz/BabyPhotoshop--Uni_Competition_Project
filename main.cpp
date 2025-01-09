@@ -12,15 +12,8 @@
 //  Version: 2.0
 //  Last Modification Date: 17/04/2024
 //  =================================================================================================================================================================================   //
-#include <iostream>
-#include <algorithm>
-#include <string>
-#include <cmath>
-#include <random>
-#include "library/Image_Class.h"
 #include "library\encryption-decryption.h"
 
-using namespace std;
 Image img_in;
 Image img_filter;
 string imginput = "NULL";

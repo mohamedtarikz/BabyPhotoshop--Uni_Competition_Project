@@ -1,3 +1,6 @@
+#ifndef ENCRYPTION_DECRYPTION_H
+#define ENCRYPTION_DECRYPTION_H
+
 #include <iostream>
 #include <algorithm>
 #include <string>
@@ -106,3 +109,5 @@ string decrypt_image(Image &img_filter) {
     }
     return final_string;
 }
+
+#endif // ENCRYPTION_DECRYPTION_H
