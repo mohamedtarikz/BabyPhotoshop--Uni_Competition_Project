@@ -1,3 +1,12 @@
+/**
+ * @file encryption-decryption.h
+ * @brief Image steganography functions for hiding and retrieving text in images.
+ * @author Marwan Hussein
+ * @date 2024
+ *
+ * This file provides functions to embed (encrypt) and extract (decrypt) text messages in images
+ * by manipulating pixel values. All code in this file was written by Marwan Hussein.
+ */
 #ifndef ENCRYPTION_DECRYPTION_H
 #define ENCRYPTION_DECRYPTION_H
 
@@ -8,7 +17,7 @@
 #include <bitset>
 #include <unistd.h>
 #include <ctime>
-#include "Image_Class.h"
+#include "..\library\Image_Class.h"
 
 using namespace std;
 

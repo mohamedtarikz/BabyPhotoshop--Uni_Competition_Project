@@ -12,7 +12,7 @@
 //  Version: 2.0
 //  Last Modification Date: 17/04/2024
 //  =================================================================================================================================================================================   //
-#include "library\encryption-decryption.h"
+#include "Src\encryption-decryption.h"
 
 Image img_in;
 Image img_filter;
