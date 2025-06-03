@@ -86,7 +86,7 @@ This feature is implemented in the `library/encryption-decryption.h` file and is
 - For large images or complex filters, processing may take longer.
 
 ## Contributors
-- Mohamed Tarek
+- Mohamed Tarik
 - Marwan Hussein
 - Mazen Nasser
 
